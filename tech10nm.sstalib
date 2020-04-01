@@ -1,0 +1,25 @@
+
+# Just comment
+# Just comment 
+
+cell NOT: 
+    form=normal
+    mu=4n
+    sigma=0.5n
+
+cell NAND2: 
+    form=normal
+    mu=6n
+    sigma=0.8n
+
+cell NOR2: 
+    form=normal
+    mu=8n
+    sigma=1n
+
+cell XOR:
+    form=pmf
+    t=[-10, -9, -8, -6, 0, 1, 2, 4]
+    p=[0.1, 0.1, 0.2, 0.2, 0.1, 0.05, 0.05, 0.1]
+
+

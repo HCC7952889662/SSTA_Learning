@@ -6,10 +6,28 @@ import random
 import scipy
 import seaborn as sns
 from scipy import stats
-
+import pdb
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
 sns.set(rc={'figure.figsize':(10,10)})
+
+
+def read_sstalib(filename):
+    infile = open(filename)
+    #condition on cell form to how to read it.
+    # it should return an object of type PDF
+    return 0
+
+
+class PDF:
+
+    def __init__(self, form=None, args):
+        if form is None:
+            print("Format is not available now")
+        elif form == "norm":
+            self.data = NORM(args["mu"], args["sigma"], args["size"])
+
+        # overload the SUM (+) or max operations
 
 def NORM(mu, sigma, size):
         x = sigma * np.random.randn(size) + mu
@@ -94,14 +112,17 @@ class node:
         sns.scatterplot(fms['Data'], fms['PDF'], color="teal")
 
 
+
+
+
 try:
-   
+
 
     mu1 = 0
     sigma1 = 1
     size1 = 20
     f1 = NORM(mu1, sigma1, size1)
-
+    pdb.set_trace()
     mu2 = 5
     sigma2 = 1
     size2 = 20
