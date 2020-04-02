@@ -10,78 +10,29 @@ import pdb
 import re
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
-sns.set(rc={'figure.figsize':(10,10)})
-
-
-def read_sstalib(filename):
-    sstalib = {}
-    infile = open(filename)
-    count = 0
-    #condition on cell form to how to read it.
-    for line in infile:  
-        if line != "":
-            if re.match(r'^#', line):
-                pass
-            else:
-                #print(line)
-                line_syntax =  re.match(r'cell (.*):',line, re.IGNORECASE)
-                if line_syntax:
-                    print(line_syntax.group(1))
-                    gate = line_syntax.group(1)
-                    count+=1
-
-                line_syntax = re.match(r'.*form = (.*)', line, re.IGNORECASE)
-                if line_syntax:
-                    print(line_syntax.group(1))
-                    form = line_syntax.group(1)
-                    count += 1
-
-                line_syntax = re.match(r'.*mu = (.*)', line, re.IGNORECASE)
-                if line_syntax:
-                    print(line_syntax.group(1))
-                    mu = line_syntax.group(1)
-                    count += 1
-
-                line_syntax = re.match(r'.*sigma = (.*)', line, re.IGNORECASE)
-                if line_syntax:
-                    print(line_syntax.group(1))
-                    sigma = line_syntax.group(1)
-                    count += 1
-
-                if count == 4:
-                    sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
-                    count = 0
-    # it should return an object of Dict
-    return sstalib
-
-#print(read_sstalib("tech10nm.sstalib"))
+sns.set(rc={'figure.figsize':(5,5)})
 
 class PDF:
-
-    def __init__(self, form=None, args):
-        if form is None:
+    def __init__(self, dict, gate, size):
+        if dict is None:
+            print('Dictionary is not complete')
+        if dict[gate]['form'] is None:
             print("Format is not available now")
-        elif form == "norm":
-            self.data = NORM(args["mu"], args["sigma"], args["size"])
+        else:
+            self.data = self.NORM(dict[gate]["mu"], dict[gate]["sigma"], size)
+            self.gate = gate
 
-        # overload the SUM (+) or max operations
-
-def NORM(mu, sigma, size):
+    def NORM(self, mu, sigma, size):
         x = sigma * np.random.randn(size) + mu
         x = np.around(x, decimals=2)
         cx = scipy.stats.norm.cdf(x, loc=mu, scale=sigma)
         px = scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
-        px = px/sum(px)################################################################
+        px = px / sum(px)  ################################################################
         f = pd.DataFrame({'Data': x, 'PDF': px, 'CDF': cx})
         print(sum(px))
         return f
-
-class node:
-    # def __init__(self,f1,f2,fc):
-    #     self.f1=f1
-    #     self.f2=f2
-    #     self.fc=fc
-
+        # overload the SUM (+) or max operations
+    
     def SUM(self,f1,f2):
         P = []
         M = []
@@ -95,7 +46,7 @@ class node:
                     P[M.index(value)] = P[M.index(value)] + f1['PDF'][i]*f2['PDF'][j]
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return f
-
+    
     def MAX(self,f1,f2):
         P = []
         M = []
@@ -123,6 +74,11 @@ class node:
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return f
 
+    def plot(self):
+        plt.figure()
+        sns.scatterplot(self.data['Data'], self.data['PDF'], color="tan")
+        plt.show()
+
     def MAX_of_SUM(self,f1,f2,fc):
         fs1 = self.SUM(f1,fc)
         fs2 = self.SUM(f2,fc)
@@ -134,7 +90,6 @@ class node:
         fm2 = self.MAX(f2,fc)
         fsm = self.SUM(fm1,fm2)
         return fsm
-
 
     def Result_plot(self,fsm, fms):
         plt.figure()
@@ -148,69 +103,57 @@ class node:
         MSP.title.set_text('SUM_of_MAX')
         sns.scatterplot(fms['Data'], fms['PDF'], color="teal")
 
+def read_sstalib(filename):
+    sstalib = {}
+    infile = open(filename)
+    count = 0
+    #condition on cell form to how to read it.
+    for line in infile:
+        if line != "":
+            if re.match(r'^#', line):
+                pass
+            else:
+                #print(line)
+                line_syntax =  re.match(r'cell (.*):',line, re.IGNORECASE)
+                if line_syntax:
+                    gate = line_syntax.group(1)
+                    count+=1
 
+                line_syntax = re.match(r'.*form = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    form = line_syntax.group(1)
+                    count += 1
 
+                line_syntax = re.match(r'.*mu = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    mu = float(line_syntax.group(1))
+                    count += 1
+
+                line_syntax = re.match(r'.*sigma = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    sigma = float(line_syntax.group(1))
+                    count += 1
+
+                if count == 4:
+                    sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
+                    count = 0
+    # it should return an object of Dict
+    #{'IPT': {'form': 'normal', 'mu': '2n', 'sigma': '0.5n'}, 'NOT': {'form': 'normal', 'mu': '4n', 'sigma': '0.5n'},
+    # 'NAND': {'form': 'normal', 'mu': '6n', 'sigma': '0.8n'}, 'AND': {'form': 'normal', 'mu': '6.5n', 'sigma': '0.8n'},
+    # 'NOR': {'form': 'normal', 'mu': '7n', 'sigma': '0.8n'}, 'OR': {'form': 'normal', 'mu': '7.5n', 'sigma': '0.8n'},
+    # 'XOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}, 'BUFF': {'form': 'normal', 'mu': '2.5n', 'sigma': '0.5n'}, 'XNOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}}
+    return sstalib
+
+def PDF_generator(sstalib, gate,size):
+    p1 = PDF(dict = sstalib, gate = gate, size = size)
+    return p1
 
 
 try:
-    read_sstalib("tech10nm.sstalib")
-    mu1 = 0
-    sigma1 = 1
-    size1 = 20
-    f1 = NORM(mu1, sigma1, size1)
-    pdb.set_trace()
-    mu2 = 5
-    sigma2 = 1
-    size2 = 20
-    f2 = NORM(mu2, sigma2, size2)
-
-    mu3 = 2
-    sigma3 = 1
-    size3 = 50
-    fc = NORM(mu3, sigma3, size3)
-
-    N = node()
-    
-    a = [2,3,4,5]
-    pa = [0.25,0.25,0.25,0.25]
-    b = [1,2,3,4,5]
-    pb = [0.2,0.2,0.2,0.2,0.2]
-    c = [6,7,8,1,2]
-    pc = [0.2,0.2,0.2,0.2,0.2]
-    f1 = pd.DataFrame({'Data': a, 'PDF': pa})
-    f2 = pd.DataFrame({'Data': b, 'PDF': pb})
-    fc = pd.DataFrame({'Data': c, 'PDF': pc})
-    
-    #fsum = SUM(f1,f2)
-    #print(fsum['PDF'].sum())
-
-    fsm = N.SUM_of_MAX(f1,f2,fc)
-    print(fsm)
-    print("finish SUM of MAX part")
-    fms = N.MAX_of_SUM(f1,f2,fc)
-    print(fms)
-    print("mean of sum of max",np.mean(fsm['Data']))
-    print("std of sum of max",np.std(fsm['Data']))
-    print("mean of max of sum",np.mean(fms['Data']))
-    print("std of max of sum",np.std(fms['Data']))
-    m1=np.mean(fsm['Data'])
-    m2=np.mean(fms['Data'])
-    s1=np.std(fsm['Data'])
-    s2=np.std(fms['Data'])
-    t=(m1-m2)/np.sqrt(((s1**2)/len(fsm['Data']))+((s2**2)/len(fms['Data'])))
-    print("value of t statistics:",t)
-    t2, p2 = stats.ttest_ind(fsm['Data'],fms['Data'])
-    print("t = " + str(t2))
-    print("p = " + str(p2))
-    N.Result_plot(fsm,fms)
-    plt.show()
-
-
-    fmax = MAX(f1,f2)
-    print(fmax)
-    sns.scatterplot(fmax['Data'],fms['PDF'], color = "green")
-    plt.show()
-
+    sstalib = read_sstalib("tech10nm.sstalib")
+    p1 = PDF_generator(sstalib,'AND',50)
+    p1.plot()
+ 
 
 except IOError:
     print("error in the code")
