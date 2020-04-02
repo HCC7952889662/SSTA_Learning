@@ -33,44 +33,44 @@ class PDF:
         return f
         # overload the SUM (+) or max operations
     
-    def SUM(self,f1,f2):
+    def SUM(self,f1):
         P = []
         M = []
         for i in range(f1['Data'].size):
-            for j in range(f2['Data'].size):
-                value = f1['Data'][i]+f2['Data'][j]
+            for j in range(self.data['Data'].size):
+                value = f1['Data'][i]+self.data['Data'][j]
                 if (value) not in M:
                     M.append(value)
-                    P.append(f1['PDF'][i]*f2['PDF'][j])
+                    P.append(f1['PDF'][i]*self.data['PDF'][j])
                 else:
-                    P[M.index(value)] = P[M.index(value)] + f1['PDF'][i]*f2['PDF'][j]
+                    P[M.index(value)] = P[M.index(value)] + f1['PDF'][i]*self.data['PDF'][j]
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return f
     
-    def MAX(self,f1,f2):
+    def MAX(self,f1):
         P = []
         M = []
         for i in range(f1['Data'].size):
             P_temp = 0
             for j in range(f2['Data'].size):
-                if (f1['Data'][i] >= f2['Data'][j]):
-                    P_temp = P_temp + f1['PDF'][i]*f2['PDF'][j]
+                if (f1['Data'][i] >= self.data['Data'][j]):
+                    P_temp = P_temp + f1['PDF'][i]*self.data['PDF'][j]
             if f1['Data'][i] not in M:
                 M.append(f1['Data'][i])
                 P.append(P_temp)
             else:
                 P[M.index(f1['Data'][i])] = P[M.index(f1['Data'][i])] + P_temp
 
-        for i in range(f2['Data'].size):
+        for i in range(self.data['Data'].size):
             P_temp = 0
             for j in range(f1['Data'].size):
-                if (f2['Data'][i] > f1['Data'][j]):
-                    P_temp = P_temp + f2['PDF'][i]*f1['PDF'][j]
-            if f2['Data'][i] not in M:
-                M.append(f2['Data'][i])
+                if (self.data['Data'][i] > f1['Data'][j]):
+                    P_temp = P_temp + self.data['PDF'][i]*f1['PDF'][j]
+            if self.data['Data'][i] not in M:
+                M.append(self.data['Data'][i])
                 P.append(P_temp)
             else:
-                P[M.index(f2['Data'][i])] = P[M.index(f2['Data'][i])] + P_temp
+                P[M.index(self.data['Data'][i])] = P[M.index(f2['Data'][i])] + P_temp
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return f
 
