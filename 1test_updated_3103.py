@@ -7,17 +7,54 @@ import scipy
 import seaborn as sns
 from scipy import stats
 import pdb
+import re
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
 sns.set(rc={'figure.figsize':(10,10)})
 
 
 def read_sstalib(filename):
+    sstalib = {}
     infile = open(filename)
+    count = 0
     #condition on cell form to how to read it.
-    # it should return an object of type PDF
-    return 0
+    for line in infile:  
+        if line != "":
+            if re.match(r'^#', line):
+                pass
+            else:
+                #print(line)
+                line_syntax =  re.match(r'cell (.*):',line, re.IGNORECASE)
+                if line_syntax:
+                    print(line_syntax.group(1))
+                    gate = line_syntax.group(1)
+                    count+=1
 
+                line_syntax = re.match(r'.*form = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    print(line_syntax.group(1))
+                    form = line_syntax.group(1)
+                    count += 1
+
+                line_syntax = re.match(r'.*mu = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    print(line_syntax.group(1))
+                    mu = line_syntax.group(1)
+                    count += 1
+
+                line_syntax = re.match(r'.*sigma = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    print(line_syntax.group(1))
+                    sigma = line_syntax.group(1)
+                    count += 1
+
+                if count == 4:
+                    sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
+                    count = 0
+    # it should return an object of Dict
+    return sstalib
+
+#print(read_sstalib("tech10nm.sstalib"))
 
 class PDF:
 
@@ -116,8 +153,7 @@ class node:
 
 
 try:
-
-
+    read_sstalib("tech10nm.sstalib")
     mu1 = 0
     sigma1 = 1
     size1 = 20
@@ -134,7 +170,7 @@ try:
     fc = NORM(mu3, sigma3, size3)
 
     N = node()
-    """
+    
     a = [2,3,4,5]
     pa = [0.25,0.25,0.25,0.25]
     b = [1,2,3,4,5]
@@ -144,7 +180,7 @@ try:
     f1 = pd.DataFrame({'Data': a, 'PDF': pa})
     f2 = pd.DataFrame({'Data': b, 'PDF': pb})
     fc = pd.DataFrame({'Data': c, 'PDF': pc})
-    """
+    
     #fsum = SUM(f1,f2)
     #print(fsum['PDF'].sum())
 
@@ -169,12 +205,12 @@ try:
     N.Result_plot(fsm,fms)
     plt.show()
 
-    """
+
     fmax = MAX(f1,f2)
     print(fmax)
     sns.scatterplot(fmax['Data'],fms['PDF'], color = "green")
     plt.show()
-    """
+
 
 except IOError:
     print("error in the code")

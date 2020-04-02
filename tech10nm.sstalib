@@ -32,7 +32,7 @@ cell OR:
     sigma = 0.8n
 
 cell XOR: 
-    form=normal
+    form = normal
     mu = 12n
     sigma = 1.5n
     
@@ -42,12 +42,7 @@ cell BUFF:
     sigma = 0.5n
 
 cell XNOR: 
-    form=normal
-    mu = 12n
-    sigma = 1.5n
-
-cell XOR: 
-    form=normal
+    form = normal
     mu = 12n
     sigma = 1.5n
 
