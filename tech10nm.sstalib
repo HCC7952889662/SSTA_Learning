@@ -7,12 +7,12 @@ cell NOT:
     mu=4n
     sigma=0.5n
 
-cell NAND2: 
+cell NAND: 
     form=normal
     mu=6n
     sigma=0.8n
 
-cell NOR2: 
+cell NOR: 
     form=normal
     mu=8n
     sigma=1n
