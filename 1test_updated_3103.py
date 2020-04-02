@@ -52,6 +52,11 @@ def read_sstalib(filename):
                     sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
                     count = 0
     # it should return an object of Dict
+        # it should return an object of Dict
+    #{'IPT': {'form': 'normal', 'mu': '2n', 'sigma': '0.5n'}, 'NOT': {'form': 'normal', 'mu': '4n', 'sigma': '0.5n'}, 
+    # 'NAND': {'form': 'normal', 'mu': '6n', 'sigma': '0.8n'}, 'AND': {'form': 'normal', 'mu': '6.5n', 'sigma': '0.8n'}, 
+    # 'NOR': {'form': 'normal', 'mu': '7n', 'sigma': '0.8n'}, 'OR': {'form': 'normal', 'mu': '7.5n', 'sigma': '0.8n'}, 
+    # 'XOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}, 'BUFF': {'form': 'normal', 'mu': '2.5n', 'sigma': '0.5n'}, 'XNOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}}
     return sstalib
 
 #print(read_sstalib("tech10nm.sstalib"))
