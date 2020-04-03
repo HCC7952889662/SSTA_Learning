@@ -11,12 +11,14 @@ import re
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
 sns.set(rc={'figure.figsize':(5,5)})
-
+##class PDF
 class PDF:
     def __init__(self, dict, gate, size, f):
+        # Using DataFrame to create an PDF obj instead of considering GateType
         if dict is None and f is not None:
-            print('Dictionary is not complete')
+            #print('Dictionary is not complete')
             self.data = f
+        # Create an PDF obj by referring to SSTALIB
         else:
             if dict[gate]['form'] is None:
                 print("Format is not available now")
@@ -30,7 +32,7 @@ class PDF:
         px = scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
         px = px / sum(px)  ################################################################
         f = pd.DataFrame({'Data': x, 'PDF': px, 'CDF': cx})
-        print(sum(px))
+        #print(sum(px))
         return f
         # overload the SUM (+) or max operations
     
@@ -75,10 +77,33 @@ class PDF:
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return PDF_generator_intermediate(f)
 
+    def sum_probability(self):
+        sum = 0.0
+        for p in self.data['PDF']:
+            sum = sum + p
+        return sum
+
+    #After this function, the data will be divide by N
+    def data_shrink(self, N):
+        k = 0
+        P = []
+        D = []
+        div, mod = divmod(len(self.data), N)
+        while k < div:
+            a = self.data.iloc[[N*k, N*(k+1)-1], :].mean()
+            P.append(a['PDF'] * N)
+            D.append(a['Data'])
+            k += 1
+        if mod != 0:
+            a = p3.data.iloc[[N*div, (N*div+mod-1)], :].mean()
+            P.append(a['PDF'] * mod)
+            D.append(a['Data'])
+        self.data = pd.DataFrame({'Data': D, 'PDF': P})
+
     def plot(self):
         plt.figure()
         sns.scatterplot(self.data['Data'], self.data['PDF'], color="tan")
-        plt.show()
+        #plt.show()
 
     def MAX_of_SUM(self,p2,pc):
         ps1 = self.SUM(pc)
@@ -162,12 +187,12 @@ try:
     p7 = PDF_generator(sstalib, 'NOR', 50)
     
     p3 = p1.SUM(p2)
-    p4 = p1.MAX(p2)
-    
-    p5 = p1.SUM_of_MAX(p2,p7)
-    p6 = p1.MAX_of_SUM(p2,p7)
-
-    p6.plot()
+    p3.plot()
+    print('before '+ str(p3.sum_probability()))
+    p3.data_shrink(2)
+    print('after ' + str(p3.sum_probability()))
+    p3.plot()
+    plt.show()
 
 except IOError:
     print("error in the code")
