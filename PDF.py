@@ -13,14 +13,15 @@ sns.set(color_codes=True,style="white")
 sns.set(rc={'figure.figsize':(5,5)})
 
 class PDF:
-    def __init__(self, dict, gate, size):
-        if dict is None:
+    def __init__(self, dict, gate, size, f):
+        if dict is None and f is not None:
             print('Dictionary is not complete')
-        if dict[gate]['form'] is None:
-            print("Format is not available now")
+            self.data = f
         else:
-            self.data = self.NORM(dict[gate]["mu"], dict[gate]["sigma"], size)
-            self.gate = gate
+            if dict[gate]['form'] is None:
+                print("Format is not available now")
+            else:
+                self.data = self.NORM(dict[gate]["mu"], dict[gate]["sigma"], size)
 
     def NORM(self, mu, sigma, size):
         x = sigma * np.random.randn(size) + mu
@@ -33,75 +34,75 @@ class PDF:
         return f
         # overload the SUM (+) or max operations
     
-    def SUM(self,f1):
+    def SUM(self,p1):
         P = []
         M = []
-        for i in range(f1['Data'].size):
+        for i in range(p1.data['Data'].size):
             for j in range(self.data['Data'].size):
-                value = f1['Data'][i]+self.data['Data'][j]
+                value = p1.data['Data'][i]+self.data['Data'][j]
                 if (value) not in M:
                     M.append(value)
-                    P.append(f1['PDF'][i]*self.data['PDF'][j])
+                    P.append(p1.data['PDF'][i]*self.data['PDF'][j])
                 else:
-                    P[M.index(value)] = P[M.index(value)] + f1['PDF'][i]*self.data['PDF'][j]
+                    P[M.index(value)] = P[M.index(value)] + p1.data['PDF'][i]*self.data['PDF'][j]
         f = pd.DataFrame({'Data': M, 'PDF': P})
-        return f
+        return PDF_generator_intermediate(f)
     
-    def MAX(self,f1):
+    def MAX(self,p1):
         P = []
         M = []
-        for i in range(f1['Data'].size):
+        for i in range(p1.data['Data'].size):
             P_temp = 0
-            for j in range(f2['Data'].size):
-                if (f1['Data'][i] >= self.data['Data'][j]):
-                    P_temp = P_temp + f1['PDF'][i]*self.data['PDF'][j]
-            if f1['Data'][i] not in M:
-                M.append(f1['Data'][i])
+            for j in range(self.data['Data'].size):
+                if (p1.data['Data'][i] >= self.data['Data'][j]):
+                    P_temp = P_temp + p1.data['PDF'][i]*self.data['PDF'][j]
+            if p1.data['Data'][i] not in M:
+                M.append(p1.data['Data'][i])
                 P.append(P_temp)
             else:
-                P[M.index(f1['Data'][i])] = P[M.index(f1['Data'][i])] + P_temp
+                P[M.index(p1.data['Data'][i])] = P[M.index(p1.data['Data'][i])] + P_temp
 
         for i in range(self.data['Data'].size):
             P_temp = 0
-            for j in range(f1['Data'].size):
-                if (self.data['Data'][i] > f1['Data'][j]):
-                    P_temp = P_temp + self.data['PDF'][i]*f1['PDF'][j]
+            for j in range(p1.data['Data'].size):
+                if (self.data['Data'][i] > p1.data['Data'][j]):
+                    P_temp = P_temp + self.data['PDF'][i]*p1.data['PDF'][j]
             if self.data['Data'][i] not in M:
                 M.append(self.data['Data'][i])
                 P.append(P_temp)
             else:
-                P[M.index(self.data['Data'][i])] = P[M.index(f2['Data'][i])] + P_temp
+                P[M.index(self.data['Data'][i])] = P[M.index(self.data['Data'][i])] + P_temp
         f = pd.DataFrame({'Data': M, 'PDF': P})
-        return f
+        return PDF_generator_intermediate(f)
 
     def plot(self):
         plt.figure()
         sns.scatterplot(self.data['Data'], self.data['PDF'], color="tan")
         plt.show()
 
-    def MAX_of_SUM(self,f1,f2,fc):
-        fs1 = self.SUM(f1,fc)
-        fs2 = self.SUM(f2,fc)
-        fms = self.MAX(fs1,fs2)
-        return fms
+    def MAX_of_SUM(self,p2,pc):
+        ps1 = self.SUM(pc)
+        ps2 = p2.SUM(pc)
+        pms = ps1.MAX(ps2)
+        return pms
 
-    def SUM_of_MAX(self,f1,f2,fc):
-        fm1 = self.MAX(f1,fc)
-        fm2 = self.MAX(f2,fc)
-        fsm = self.SUM(fm1,fm2)
-        return fsm
+    def SUM_of_MAX(self,p2,pc):
+        pm1 = self.MAX(pc)
+        pm2 = p2.MAX(pc)
+        psm = pm1.SUM(pm2)
+        return psm
 
-    def Result_plot(self,fsm, fms):
+    def Result_plot(self,psm, pms):
         plt.figure()
         plt.subplot2grid((1,2), (0, 0), colspan=2)
         #######Start to plot
         SMP = plt.subplot2grid((1, 2), (0, 0))
         SMP.title.set_text('MAX_of_SUM')
-        sns.scatterplot(fsm['Data'], fsm['PDF'], color="tan")
+        sns.scatterplot(psm.data['Data'], psm.data['PDF'], color="tan")
 
         MSP = plt.subplot2grid((1, 2), (0, 1))
         MSP.title.set_text('SUM_of_MAX')
-        sns.scatterplot(fms['Data'], fms['PDF'], color="teal")
+        sns.scatterplot(pms.data['Data'], pms.data['PDF'], color="teal")
 
 def read_sstalib(filename):
     sstalib = {}
@@ -145,15 +146,28 @@ def read_sstalib(filename):
     return sstalib
 
 def PDF_generator(sstalib, gate,size):
-    p1 = PDF(dict = sstalib, gate = gate, size = size)
+    p1 = PDF(dict = sstalib, gate = gate, size = size, f=None)
     return p1
 
+def PDF_generator_intermediate(f):
+    p1 = PDF(dict = None, gate = None, size = None, f = f)
+    return p1
 
 try:
     sstalib = read_sstalib("tech10nm.sstalib")
     p1 = PDF_generator(sstalib,'AND',50)
-    p1.plot()
- 
+    #p1.plot()
+    
+    p2 = PDF_generator(sstalib, 'OR', 50)
+    p7 = PDF_generator(sstalib, 'NOR', 50)
+    
+    p3 = p1.SUM(p2)
+    p4 = p1.MAX(p2)
+    
+    p5 = p1.SUM_of_MAX(p2,p7)
+    p6 = p1.MAX_of_SUM(p2,p7)
+
+    p6.plot()
 
 except IOError:
     print("error in the code")
