@@ -1,0 +1,190 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import math
+import random
+import scipy
+import seaborn as sns
+from scipy import stats
+import pdb
+import re
+from main import nodelist_test
+sns.set(color_codes=True,style="white")
+# settings for seaborn plot sizes
+sns.set(rc={'figure.figsize':(5,5)})
+
+class PDF:
+    def __init__(self, dict, gate, size):
+        if dict is None:
+            print('Dictionary is not complete')
+        if dict[gate]['form'] is None:
+            print("Format is not available now")
+        else:
+            self.size=size
+            self.data = self.NORM(dict[gate]["mu"], dict[gate]["sigma"], size)
+            self.gate = gate
+
+    def NORM(self, mu, sigma, size):
+        x = sigma * np.random.randn(size) + mu
+        x = np.around(x, decimals=2)
+        cx = scipy.stats.norm.cdf(x, loc=mu, scale=sigma)
+        px = scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
+        px = px / sum(px)  ################################################################
+        f = pd.DataFrame({'Data': x, 'PDF': px, 'CDF': cx})
+        # print(sum(px))
+        return f
+        # overload the SUM (+) or max operations
+    
+    
+
+    def plot(self):
+        plt.figure()
+        sns.scatterplot(self.data['Data'], self.data['PDF'], color="tan")
+        plt.show()
+
+    # def MAX_of_SUM(self,f1,f2,fc):
+    #     fs1 = self.SUM(f1,fc)
+    #     fs2 = self.SUM(f2,fc)
+    #     fms = self.MAX(fs1,fs2)
+    #     return fms
+
+    # def SUM_of_MAX(self,f1,f2,fc):      ##fc is self
+    #     fm1 = self.MAX(f1,fc)
+    #     fm2 = self.MAX(f2,fc)
+    #     fsm = self.SUM(fm1,fm2)
+    #     return fsm
+
+    def Result_plot(self,fsm, fms):
+        plt.figure()
+        plt.subplot2grid((1,2), (0, 0), colspan=2)
+        #######Start to plot
+        SMP = plt.subplot2grid((1, 2), (0, 0))
+        SMP.title.set_text('MAX_of_SUM')
+        sns.scatterplot(fsm['Data'], fsm['PDF'], color="tan")
+
+        MSP = plt.subplot2grid((1, 2), (0, 1))
+        MSP.title.set_text('SUM_of_MAX')
+        sns.scatterplot(fms['Data'], fms['PDF'], color="teal")
+
+def SUM(f1,f2):
+        P = []
+        M = []
+        for i in range(f1['Data'].size):
+            for j in range(f2['Data'].size):
+                value = f1['Data'][i]+f2['Data'][j]
+                if (value) not in M:
+                    M.append(value)
+                    P.append(f1['PDF'][i]*f2['PDF'][j])
+                else:
+                    P[M.index(value)] = P[M.index(value)] + f1['PDF'][i]*f2['PDF'][j]
+        f = pd.DataFrame({'Data': M, 'PDF': P})
+        return f
+    
+def MAX(f1,f2):
+    P = []
+    M = []
+    for i in range(f1['Data'].size):
+        P_temp = 0
+        for j in range(f2['Data'].size):
+            if (f1['Data'][i] >= f2['Data'][j]):
+                P_temp = P_temp + f1['PDF'][i]*f2['PDF'][j]
+        if f1['Data'][i] not in M:
+            M.append(f1['Data'][i])
+            P.append(P_temp)
+        else:
+            P[M.index(f1['Data'][i])] = P[M.index(f1['Data'][i])] + P_temp
+
+    for i in range(f2['Data'].size):
+        P_temp = 0
+        for j in range(f1['Data'].size):
+            if (f2['Data'][i] > f1['Data'][j]):
+                P_temp = P_temp + f2['PDF'][i]*f1['PDF'][j]
+        if f2['Data'][i] not in M:
+            M.append(f2['Data'][i])
+            P.append(P_temp)
+        else:
+            P[M.index(f2['Data'][i])] = P[M.index(f2['Data'][i])] + P_temp
+    f = pd.DataFrame({'Data': M, 'PDF': P})
+    return f
+
+def plot(f):
+        plt.figure()
+        sns.scatterplot(f['Data'], f['PDF'], color="tan")
+        plt.show()
+
+def read_sstalib(filename):
+    sstalib = {}
+    infile = open(filename)
+    count = 0
+    #condition on cell form to how to read it.
+    for line in infile:
+        if line != "":
+            if re.match(r'^#', line):
+                pass
+            else:
+                #print(line)
+                line_syntax =  re.match(r'cell (.*):',line, re.IGNORECASE)
+                if line_syntax:
+                    gate = line_syntax.group(1)
+                    count+=1
+
+                line_syntax = re.match(r'.*form = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    form = line_syntax.group(1)
+                    count += 1
+
+                line_syntax = re.match(r'.*mu = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    mu = float((line_syntax.group(1)).rstrip('n'))      ###updated
+                    count += 1
+
+                line_syntax = re.match(r'.*sigma = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    sigma = float((line_syntax.group(1)).rstrip('n'))   ###updated
+                    count += 1
+
+                if count == 4:
+                    sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
+                    count = 0
+    # it should return an object of Dict
+    #{'IPT': {'form': 'normal', 'mu': '2n', 'sigma': '0.5n'}, 'NOT': {'form': 'normal', 'mu': '4n', 'sigma': '0.5n'},
+    # 'NAND': {'form': 'normal', 'mu': '6n', 'sigma': '0.8n'}, 'AND': {'form': 'normal', 'mu': '6.5n', 'sigma': '0.8n'},
+    # 'NOR': {'form': 'normal', 'mu': '7n', 'sigma': '0.8n'}, 'OR': {'form': 'normal', 'mu': '7.5n', 'sigma': '0.8n'},
+    # 'XOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}, 'BUFF': {'form': 'normal', 'mu': '2.5n', 'sigma': '0.5n'}, 'XNOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}}
+    return sstalib
+
+def PDF_generator(sstalib, gate,size):  
+    p1 = PDF(dict = sstalib, gate = gate, size = size)      #it gives the delay distribution of the gate.
+    return p1
+
+
+try:
+    sstalib = read_sstalib("tech10nm.sstalib")
+    # p1 = PDF_generator(sstalib,'AND',50)
+    # p1.plot()
+    for i in nodelist_test:
+        print('{}\t{}\t{}\t'.format(i.gtype, i.lev, i.num))
+        if(i.gtype!='BRCH'):
+            if(i.gtype=='IPT'):
+                i.total_dist=(PDF_generator(sstalib,i.gtype,50)).data    
+            else:
+                i.gate_dist=(PDF_generator(sstalib,i.gtype,50)).data       ###every node gets its distribution data except for BRCH
+   
+    for i in nodelist_test:
+        print(i.num)
+        if(i.gtype!='IPT'):
+            if(i.gtype=='BRCH'):    ###For 'BRCH' type gates simply update their total_dist with whatever node they are connected to.
+                i.total_dist=i.unodes[0].total_dist
+            else:
+                if(len(i.unodes)==2):      ##2 input gates
+                    max_of_inputs = MAX((i.unodes[0].total_dist),i.unodes[1].total_dist)
+                    i.total_dist = SUM((i.gate_dist),max_of_inputs)
+                    print(i.num,i.unodes[0].num,i.unodes[1].num,(i.total_dist)['Data'].size)
+                    # plot(i.total_dist)
+        print(type(i.total_dist))
+        
+   
+    # nodelist_test[9].total_dist.plot()
+
+except IOError:
+    print("error in the code")
