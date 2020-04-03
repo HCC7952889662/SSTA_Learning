@@ -1,50 +1,50 @@
-
+# 1n
 # 10nm lib file 
 
 cell IPT: 
     form = normal
-    mu = 2n
-    sigma = 0.5n
+    mu = 2
+    sigma = 0.5
 
 cell NOT: 
     form = normal
-    mu = 4n
-    sigma = 0.5n
+    mu = 4
+    sigma = 0.5
 
 cell NAND: 
     form = normal
-    mu = 6n
-    sigma = 0.8n
+    mu = 6
+    sigma = 0.8
 
 cell AND: 
     form = normal
-    mu = 6.5n
-    sigma = 0.8n
+    mu = 6.5
+    sigma = 0.8
 
 cell NOR: 
     form = normal
-    mu = 7n
-    sigma = 0.8n
+    mu = 7
+    sigma = 0.8
 
 cell OR: 
     form = normal
-    mu = 7.5n
-    sigma = 0.8n
+    mu = 7.5
+    sigma = 0.8
 
 cell XOR: 
     form = normal
-    mu = 12n
-    sigma = 1.5n
+    mu = 12
+    sigma = 1.5
     
 cell BUFF: 
     form = normal
-    mu = 2.5n
-    sigma = 0.5n
+    mu = 2.5
+    sigma = 0.5
 
 cell XNOR: 
     form = normal
-    mu = 12n
-    sigma = 1.5n
+    mu = 12
+    sigma = 1.5
 
 #cell XOR:
 #    form=pmf
