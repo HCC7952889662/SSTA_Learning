@@ -84,7 +84,7 @@ class PDF:
         return sum
 
     #After this function, the data will be divide by N
-    def data_shrink(self, N):
+    def data_shrink_core(self, N):
         k = 0
         P = []
         D = []
@@ -99,6 +99,14 @@ class PDF:
             P.append(a['PDF'] * mod)
             D.append(a['Data'])
         self.data = pd.DataFrame({'Data': D, 'PDF': P})
+
+    def data_shrink_mode(self,N,mode='fast'):
+        if mode == 'fast':
+            self.data_shrink_core(N)
+        elif mode == 'precise': # N must be power of 2
+            while N > 1:
+                N, mod = divmod(N, 2)
+                self.data_shrink_core(2)
 
     def plot(self):
         plt.figure()
@@ -189,7 +197,7 @@ try:
     p3 = p1.SUM(p2)
     p3.plot()
     print('before '+ str(p3.sum_probability()))
-    p3.data_shrink(2)
+    p3.data_shrink_mode(16, mode='fast')
     print('after ' + str(p3.sum_probability()))
     p3.plot()
     plt.show()
