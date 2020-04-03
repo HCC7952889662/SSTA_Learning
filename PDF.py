@@ -83,7 +83,7 @@ class PDF:
             sum = sum + p
         return sum
 
-    #After this function, the data will be divide by N
+    #After this function, the size of data will be divide by N
     def data_shrink_core(self, N):
         k = 0
         P = []
@@ -95,11 +95,12 @@ class PDF:
             D.append(a['Data'])
             k += 1
         if mod != 0:
-            a = p3.data.iloc[[N*div, (N*div+mod-1)], :].mean()
+            a = self.data.iloc[[N*div, (N*div+mod-1)], :].mean()
             P.append(a['PDF'] * mod)
             D.append(a['Data'])
         self.data = pd.DataFrame({'Data': D, 'PDF': P})
 
+    #2 mode for shrink, the default is fast and the other mode is 'precise' , in this mode, N is better to be power of 2
     def data_shrink_mode(self,N,mode='fast'):
         if mode == 'fast':
             self.data_shrink_core(N)
@@ -172,10 +173,11 @@ def read_sstalib(filename):
                     sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
                     count = 0
     # it should return an object of Dict
-    #{'IPT': {'form': 'normal', 'mu': '2n', 'sigma': '0.5n'}, 'NOT': {'form': 'normal', 'mu': '4n', 'sigma': '0.5n'},
-    # 'NAND': {'form': 'normal', 'mu': '6n', 'sigma': '0.8n'}, 'AND': {'form': 'normal', 'mu': '6.5n', 'sigma': '0.8n'},
-    # 'NOR': {'form': 'normal', 'mu': '7n', 'sigma': '0.8n'}, 'OR': {'form': 'normal', 'mu': '7.5n', 'sigma': '0.8n'},
-    # 'XOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}, 'BUFF': {'form': 'normal', 'mu': '2.5n', 'sigma': '0.5n'}, 'XNOR': {'form': 'normal', 'mu': '12n', 'sigma': '1.5n'}}
+    #{'IPT': {'form': 'normal', 'mu': '2', 'sigma': '0.5'},  'NOT': {'form': 'normal', 'mu': '4', 'sigma': '0.5'},
+    # 'NAND': {'form': 'normal', 'mu': '6', 'sigma': '0.8'}, 'AND': {'form': 'normal', 'mu': '6.5', 'sigma': '0.8'},
+    # 'NOR': {'form': 'normal', 'mu': '7', 'sigma': '0.8'},  'OR': {'form': 'normal', 'mu': '7.5', 'sigma': '0.8'},
+    # 'XOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}, 'BUFF': {'form': 'normal', 'mu': '2.5', 'sigma': '0.5'},
+    # 'XNOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}}
     return sstalib
 
 def PDF_generator(sstalib, gate,size):
@@ -188,19 +190,16 @@ def PDF_generator_intermediate(f):
 
 try:
     sstalib = read_sstalib("tech10nm.sstalib")
-    p1 = PDF_generator(sstalib,'AND',50)
+    p1 = PDF_generator(sstalib,'AND',500)
     #p1.plot()
     
     p2 = PDF_generator(sstalib, 'OR', 50)
-    p7 = PDF_generator(sstalib, 'NOR', 50)
-    
-    p3 = p1.SUM(p2)
-    p3.plot()
-    print('before '+ str(p3.sum_probability()))
-    p3.data_shrink_mode(16, mode='fast')
-    print('after ' + str(p3.sum_probability()))
-    p3.plot()
-    plt.show()
+
+    print('before '+ str(p1.sum_probability()))
+    p1.data_shrink_mode(10, mode='fast')
+    print('after ' + str(p1.sum_probability()))
+
+    #plt.show()
 
 except IOError:
     print("error in the code")
