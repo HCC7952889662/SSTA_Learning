@@ -56,6 +56,9 @@ class PDF:
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return PDF_generator_intermediate(f)
     
+    def __add__(self,p1):   ## '+' operator overloading
+        return self.SUM(p1)
+    
     def MAX(self,p1):
         P = []
         M = []
