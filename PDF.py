@@ -13,26 +13,35 @@ sns.set(color_codes=True,style="white")
 sns.set(rc={'figure.figsize':(5,5)})
 ##class PDF
 class PDF:
-    def __init__(self, mu, sigma, size, f= None):
-        # Using DataFrame to create an PDF obj instead of considering GateType
+    def __init__(self, mu, sigma, size=100, f= None):
+        # Using DataFrame to create an PDF obj from the result of SUM or MAX function
         if f is not None:
             self.data = f
         # Create an PDF obj by referring to SSTALIB
         else:
-            self.data = self.NORM(mu, sigma, size)
+            if mu is None or sigma is None:
+                print('invalid input')
+            else:
+                self.data = self.NORM(mu, sigma, size)
 
+    #Generating the PDF function by the given mu  sigma and size
     def NORM(self, mu, sigma, size):
         x = sigma * np.random.randn(size) + mu
         x = np.around(x, decimals=2)
         cx = scipy.stats.norm.cdf(x, loc=mu, scale=sigma)
         px = scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
-        px = px / sum(px)  ################################################################
+        px = px / sum(px)
         f = pd.DataFrame({'Data': x, 'PDF': px, 'CDF': cx})
         f = f.sort_values(by='PDF')
         #print(sum(px))
         return f
         # overload the SUM (+) or max operations
-    
+    def mu(self):
+        return self.data.mean(axis=0)['Data']
+
+    def std(self):
+        return p1.data.std(axis=0)['Data']
+
     def SUM(self,p1):
         P = []
         M = []
@@ -180,21 +189,22 @@ def read_sstalib(filename):
 def PDF_generator(sstalib, gate,size):
     p1 = PDF(mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'], size = size, f=None)
     return p1
-
 def PDF_generator_intermediate(f):
     p1 = PDF(mu = None, sigma = None, size = None, f = f)
     return p1
 
 try:
     sstalib = read_sstalib("tech10nm.sstalib")
-    p1 = PDF_generator(sstalib,'AND',500)
+    p1 = PDF_generator(sstalib,'AND',5000)
     #p1.plot()
-    
-    p2 = PDF_generator(sstalib, 'OR', 50)
 
+    #print(p1.mu())
+    #print(p1.std())
+    print(len(p1.data))
     print('before '+ str(p1.sum_probability()))
-    p1.data_shrink_mode(10, mode='fast')
+    p1.data_shrink_mode(32, mode='fast')#precise will be good
     print('after ' + str(p1.sum_probability()))
+    print(len(p1.data))
 
     #plt.show()
 
