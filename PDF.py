@@ -56,6 +56,23 @@ class PDF:
         f = pd.DataFrame({'Data': M, 'PDF': P})
         return PDF_generator_intermediate(f)
     
+    # maybe try with no shrink?
+    # only shrink after MAX is done?
+    def SUMr(self,p1):
+        P = []
+        M = []
+        for i in range(p1.data['Data'].size):
+            for j in range(self.data['Data'].size):
+                value = p1.data['Data'][i]+self.data['Data'][j]
+                value = round(value,2)
+                if (value) not in M:
+                    M.append(value)
+                    P.append(p1.data['PDF'][i]*self.data['PDF'][j])
+                else:
+                    P[M.index(value)] = P[M.index(value)] + p1.data['PDF'][i]*self.data['PDF'][j]
+        f = pd.DataFrame({'Data': M, 'PDF': P})
+        return PDF_generator_intermediate(f)
+    
     def __add__(self,p1):   ## '+' operator overloading
         return self.SUM(p1)
     
