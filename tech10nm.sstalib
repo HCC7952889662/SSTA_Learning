@@ -4,47 +4,47 @@
 cell IPT: 
     form = normal
     mu = 2
-    sigma = 0.5
+    sigma = 0.1
 
 cell NOT: 
     form = normal
     mu = 4
-    sigma = 0.5
+    sigma = 0.1
 
 cell NAND: 
     form = normal
     mu = 6
-    sigma = 0.8
+    sigma = 0.1
 
 cell AND: 
     form = normal
     mu = 6.5
-    sigma = 0.8
+    sigma = 0.15
 
 cell NOR: 
     form = normal
     mu = 7
-    sigma = 0.8
+    sigma = 0.1
 
 cell OR: 
     form = normal
     mu = 7.5
-    sigma = 0.8
+    sigma = 0.15
 
 cell XOR: 
     form = normal
     mu = 12
-    sigma = 1.5
+    sigma = 0.2
     
 cell BUFF: 
     form = normal
     mu = 2.5
-    sigma = 0.5
+    sigma = 0.1
 
 cell XNOR: 
     form = normal
     mu = 12
-    sigma = 1.5
+    sigma = 0.2
 
 #cell XOR:
 #    form=pmf
