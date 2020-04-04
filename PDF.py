@@ -13,17 +13,13 @@ sns.set(color_codes=True,style="white")
 sns.set(rc={'figure.figsize':(5,5)})
 ##class PDF
 class PDF:
-    def __init__(self, dict, gate, size, f):
+    def __init__(self, mu, sigma, size, f= None):
         # Using DataFrame to create an PDF obj instead of considering GateType
-        if dict is None and f is not None:
-            #print('Dictionary is not complete')
+        if f is not None:
             self.data = f
         # Create an PDF obj by referring to SSTALIB
         else:
-            if dict[gate]['form'] is None:
-                print("Format is not available now")
-            else:
-                self.data = self.NORM(dict[gate]["mu"], dict[gate]["sigma"], size)
+            self.data = self.NORM(mu, sigma, size)
 
     def NORM(self, mu, sigma, size):
         x = sigma * np.random.randn(size) + mu
@@ -32,6 +28,7 @@ class PDF:
         px = scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
         px = px / sum(px)  ################################################################
         f = pd.DataFrame({'Data': x, 'PDF': px, 'CDF': cx})
+        f = f.sort_values(by='PDF')
         #print(sum(px))
         return f
         # overload the SUM (+) or max operations
@@ -181,11 +178,11 @@ def read_sstalib(filename):
     return sstalib
 
 def PDF_generator(sstalib, gate,size):
-    p1 = PDF(dict = sstalib, gate = gate, size = size, f=None)
+    p1 = PDF(mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'], size = size, f=None)
     return p1
 
 def PDF_generator_intermediate(f):
-    p1 = PDF(dict = None, gate = None, size = None, f = f)
+    p1 = PDF(mu = None, sigma = None, size = None, f = f)
     return p1
 
 try:

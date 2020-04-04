@@ -42,6 +42,8 @@ try:
         if(i.lev==max_lvl):
             print("showing plot for node",i.num)
             i.total_dist.plot()
+
+    plt.show()
     print("simulation ends.")
 except IOError:
     print("error in the code")
