@@ -7,6 +7,8 @@ Team Member: Zhiyu Chen, Hsu-Cheng Cheng and Harmanpreet Singh Kalsi
 ## Fast Test of SSTA calculation:
 python3 ckt_sim.py
 
+## System Diagram
+
 ## PDF(Probability Density Function) Object
 In the PDF object, the constructor will create a PDF according to the given 5 arguments.
 1. mu : mu is the mean value of a giveen data.
@@ -34,7 +36,7 @@ In the PDF object, the constructor will create a PDF according to the given 5 ar
 2. SUM_of_MAX(PDF p2, PDF pc): do the SUM(self,pc) ,SUM(p2,pc) and do the MAX of those 2 sum results and return the final result. Return Type: PDF Object
 These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
 
-## The Speed Improved Functions in PDF Object:
+## Speed Improved Functions in PDF Object:
 1. SUMr(PDF, R): we will round the value of time delay to the Rth decimal place in order to  decrease the output data points and thus the speed can be improved. Argument: R(integer), Return Type: PDF Object.
 
 2. data_shrink_mode(self,N,mode): This function will sort data by its probability first, and then take every N adjacent points to combine them as 1 new point with the time delay is equal to their means and probability is equal to their summatiom. 
