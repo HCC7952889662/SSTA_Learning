@@ -1,9 +1,11 @@
-# SSTA_Learning
-This repostory is for SSTA team in EE595. 
+# SSTA_Learning_Project
+![](https://img.shields.io/github/repo-size/TheAlgorithms/Python.svg?label=Repo%20size&style=flat-square)&nbsp;
+This repostory is for SSTA team in EE595 at University of Southern California. 
 
+## Members
 Project Instructor: Shahin Nazarian and MohammadSaeed Abrishami
-
 Team Member: Zhiyu Chen(Andrew), Hsu-Cheng Cheng(Alex) and Harmanpreet Singh Kalsi
+
 ## Fast Test of SSTA calculation:
 ```
 python3 ckt_sim.py
