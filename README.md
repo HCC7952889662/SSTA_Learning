@@ -4,7 +4,7 @@ This repostory is for SSTA team in EE595.
 Project Instructor: Shahin Nazarian and MohammadSaeed Abrishami
 
 Team Member: Zhiyu Chen, Hsu-Cheng Cheng and Harmanpreet Singh Kalsi
-# Fast Test of SSTA calculation:
+## Fast Test of SSTA calculation:
 python3 ckt_sim.py
 
 # PDF(Probability Density Function) Object
