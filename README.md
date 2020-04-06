@@ -7,7 +7,7 @@ Team Member: Zhiyu Chen, Hsu-Cheng Cheng and Harmanpreet Singh Kalsi
 ## Fast Test of SSTA calculation:
 python3 ckt_sim.py
 
-## System Diagram
+## SSTA System Diagram
 
 ## PDF(Probability Density Function) Object
 In the PDF object, the constructor will create a PDF according to the given 5 arguments.
@@ -30,12 +30,6 @@ In the PDF object, the constructor will create a PDF according to the given 5 ar
 
 6.plot(): plot the PDF Object.
 
-## Experimental Functions in PDF Object:
-1. MAX_of_SUM(PDF p2, PDF pc): do the MAX(self,pc) ,MAX(p2,pc) and do the SUM of those 2 max results and return the final result. Return Type: PDF Object  
-
-2. SUM_of_MAX(PDF p2, PDF pc): do the SUM(self,pc) ,SUM(p2,pc) and do the MAX of those 2 sum results and return the final result. Return Type: PDF Object
-These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
-
 ## Speed Improved Functions in PDF Object:
 1. SUMr(PDF, R): we will round the value of time delay to the Rth decimal place in order to  decrease the output data points and thus the speed can be improved. Argument: R(integer), Return Type: PDF Object.
 
@@ -43,4 +37,11 @@ These 2 functions are designed for the experiment in PHASE I project, which is t
 The 'fast' mode: the function will directly take N points.
 The 'precise' mode: N had better be power of 2, the function will take 2 points every time, and do (logN/log2) times.   
 Argument: N(Integer), mode(string): 'fast' and 'precise', Return Type: None
+
+## Experimental Functions in PDF Object:
+1. MAX_of_SUM(PDF p2, PDF pc): do the MAX(self,pc) ,MAX(p2,pc) and do the SUM of those 2 max results and return the final result. Return Type: PDF Object  
+
+2. SUM_of_MAX(PDF p2, PDF pc): do the SUM(self,pc) ,SUM(p2,pc) and do the MAX of those 2 sum results and return the final result. Return Type: PDF Object
+These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
+
 
