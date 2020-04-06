@@ -1,5 +1,5 @@
 # SSTA_Learning_Project
-This repostory is for SSTA team in EE595 at University of Southern California. 
+### This repostory is for SSTA team in EE595 at University of Southern California. 
 
 ## Members and Collaborative Team
 Project Instructors: Shahin Nazarian and MohammadSaeed Abrishami
