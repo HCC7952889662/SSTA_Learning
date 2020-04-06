@@ -1,13 +1,15 @@
 # SSTA_Learning_Project
 This repostory is for SSTA team in EE595 at University of Southern California. 
 
-## Members
+## Members and Collaborative Team
 Project Instructors: Shahin Nazarian and MohammadSaeed Abrishami
 
 Team Members:
 * [Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
 * [Hsu-Cheng Cheng(Alex)](https://github.com/HCC7952889662)
 * [Harmanpreet Singh Kalsi](https://github.com/hkalsi-usc)
+
+Collaborative Team : ATPG Team
 
 ## Fast Test of SSTA calculation:
 ```
