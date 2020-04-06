@@ -9,7 +9,7 @@ python3 ckt_sim.py
 
 ## SSTA System Diagram
 ![Diagram](/images/System_Diagram.png)
-by ZhiYu
+<p align="right">by ZhiYu</p>
 
 ## PDF(Probability Density Function) Object
 In the PDF object, the constructor will create a PDF according to the given 5 arguments.
