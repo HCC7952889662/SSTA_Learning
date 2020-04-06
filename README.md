@@ -7,7 +7,7 @@ Team Member: Zhiyu Chen, Hsu-Cheng Cheng and Harmanpreet Singh Kalsi
 ## Fast Test of SSTA calculation:
 python3 ckt_sim.py
 
-# PDF(Probability Density Function) Object
+## PDF(Probability Density Function) Object
 In the PDF object, the constructor will create a PDF according to the given 5 arguments.
 1. mu : mu is the mean value of a giveen data.
 2. sigma: sigma is a square of std of a given data.
@@ -15,7 +15,7 @@ In the PDF object, the constructor will create a PDF according to the given 5 ar
 4. form: form represents which kinds of PDF the user needs. 
 5. f(default = none): It is a pandas Dataframe which only has the emperical data
 
-# Basic Functions in PDF Object:
+## Basic Functions in PDF Object:
 1.SUM(PDF) : return the result of the summation of 2 PDFs. Return Type: PDF Object
 
 2.MAX(PDF) : return the result of the maximum of 2 PDFS. Return Type: PDF Object 
@@ -28,13 +28,13 @@ In the PDF object, the constructor will create a PDF according to the given 5 ar
 
 6.plot(): plot the PDF Object.
 
-# Experimental Functions in PDF Object:
+## Experimental Functions in PDF Object:
 1. MAX_of_SUM(PDF p2, PDF pc): do the MAX(self,pc) ,MAX(p2,pc) and do the SUM of those 2 max results and return the final result. Return Type: PDF Object  
 
 2. SUM_of_MAX(PDF p2, PDF pc): do the SUM(self,pc) ,SUM(p2,pc) and do the MAX of those 2 sum results and return the final result. Return Type: PDF Object
 These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
 
-# The Speed Improved Functions in PDF Object:
+## The Speed Improved Functions in PDF Object:
 1. SUMr(PDF, R): we will round the value of time delay to the Rth decimal place in order to  decrease the output data points and thus the speed can be improved. Argument: R(integer), Return Type: PDF Object.
 
 2. data_shrink_mode(self,N,mode): This function will sort data by its probability first, and then take every N adjacent points to combine them as 1 new point with the time delay is equal to their means and probability is equal to their summatiom. 
