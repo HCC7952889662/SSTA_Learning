@@ -46,6 +46,15 @@ cell XNOR:
     mu = 12
     sigma = 0.2
 
+cell TEST:
+    form = normal
+    mu = 3
+    sigma = 0.3
+
+cell TEST1:
+    form = normal
+    mu = 2
+    sigma = 0.8
 #cell XOR:
 #    form=pmf
 #    t=[-10, -9, -8, -6, 0, 1, 2, 4]

@@ -1,167 +1,115 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
-import math
-import random
-import scipy
 import seaborn as sns
-from scipy import stats
+from scipy.stats import norm
 import re
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
 sns.set(rc={'figure.figsize':(5,5)})
+
 ##class PDF
 class PDF:
-    def __init__(self, mu, sigma, size=100, f= None):
-        # Using DataFrame to create an PDF obj from the result of SUM or MAX function
-        if f is not None:
-            self.data = f
-        # Create an PDF obj by referring to SSTALIB
+    def __init__(self, sample_dist, mu=None, sigma=None, size= 101, delay=None, pdf=None, decimal_place= None):
+        if delay is not None and pdf is not None:
+            self.delay = delay
+            self.pdf = pdf
+            self.sample_dist = sample_dist
+            self.decimal_place = decimal_place
         else:
             if mu is None or sigma is None:
                 print('invalid input')
             else:
-                self.data = self.NORM(mu, sigma, size)
+                self.sample_dist = sample_dist
+                self.decimal_place = self.decimal_place_generator()
+                self.delay, self.pdf = self.NORM(mu, sigma, sample_dist, size)
 
     #Generating the PDF function by the given mu  sigma and size
-    def NORM(self, mu, sigma, size):
-        x = sigma * np.random.randn(size) + mu
-        x = np.around(x, decimals=2)
-        cx = scipy.stats.norm.cdf(x, loc=mu, scale=sigma)
-        px = scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
+    def NORM(self, mu, sigma, sample_dist, size):
+        k = (size - 1) * sample_dist / 2
+        # print(k)
+        x = np.arange(mu - k, mu + k, sample_dist)
+        x = np.around(x, decimals=self.decimal_place)
+        px = norm.pdf(x, loc=mu, scale=sigma)
         px = px / sum(px)
-        f = pd.DataFrame({'Data': x, 'PDF': px, 'CDF': cx})
-        f = f.sort_values(by='PDF')
-        #print(sum(px))
-        return f
-        # overload the SUM (+) or max operations
-    def mu(self):
-        return self.data.mean(axis=0)['Data']
+        return x, px
 
-    def std(self):
-        return p1.data.std(axis=0)['Data']
+    def decimal_place_generator(self):
+        c = 0
+        sd = self.sample_dist
+        while (sd < 1):
+            sd *= 10
+            c += 1
+        return c
 
-    def SUM(self,p1):
-        P = []
-        M = []
-        for i in range(p1.data['Data'].size):
-            for j in range(self.data['Data'].size):
-                value = p1.data['Data'][i]+self.data['Data'][j]
-                if (value) not in M:
-                    M.append(value)
-                    P.append(p1.data['PDF'][i]*self.data['PDF'][j])
-                else:
-                    P[M.index(value)] = P[M.index(value)] + p1.data['PDF'][i]*self.data['PDF'][j]
-        f = pd.DataFrame({'Data': M, 'PDF': P})
-        return PDF_generator_intermediate(f)
-    
-    # maybe try with no shrink?
-    # only shrink after MAX is done?
-    def SUMr(self,p1):
-        P = []
-        M = []
-        for i in range(p1.data['Data'].size):
-            for j in range(self.data['Data'].size):
-                value = p1.data['Data'][i]+self.data['Data'][j]
-                value = round(value,2)
-                if (value) not in M:
-                    M.append(value)
-                    P.append(p1.data['PDF'][i]*self.data['PDF'][j])
-                else:
-                    P[M.index(value)] = P[M.index(value)] + p1.data['PDF'][i]*self.data['PDF'][j]
-        f = pd.DataFrame({'Data': M, 'PDF': P})
-        return PDF_generator_intermediate(f)
-    
-    def __add__(self,p1):   ## '+' operator overloading
-        return self.SUM(p1)
-    
-    def MAX(self,p1):
-        P = []
-        M = []
-        for i in range(p1.data['Data'].size):
-            P_temp = 0
-            for j in range(self.data['Data'].size):
-                if (p1.data['Data'][i] >= self.data['Data'][j]):
-                    P_temp = P_temp + p1.data['PDF'][i]*self.data['PDF'][j]
-            if p1.data['Data'][i] not in M:
-                M.append(p1.data['Data'][i])
-                P.append(P_temp)
-            else:
-                P[M.index(p1.data['Data'][i])] = P[M.index(p1.data['Data'][i])] + P_temp
+    def SUM(self, PDF2):
+        # Step1 : create numpy.array of the sum result and the size is from sum of min to sum of max
+        # also initialize the sum
+        min_of_sum = round(self.delay.min() + PDF2.delay.min(), self.decimal_place)
+        max_of_sum = round(self.delay.max() + PDF2.delay.max(), self.decimal_place)
+        size = int((max_of_sum - min_of_sum) / sample_dist) + 1
+        sum_delay = np.around(np.linspace(min_of_sum, max_of_sum, size, endpoint=True), decimals=self.decimal_place)
+        sum_pdf = np.zeros(size)
 
-        for i in range(self.data['Data'].size):
-            P_temp = 0
-            for j in range(p1.data['Data'].size):
-                if (self.data['Data'][i] > p1.data['Data'][j]):
-                    P_temp = P_temp + self.data['PDF'][i]*p1.data['PDF'][j]
-            if self.data['Data'][i] not in M:
-                M.append(self.data['Data'][i])
-                P.append(P_temp)
-            else:
-                P[M.index(self.data['Data'][i])] = P[M.index(self.data['Data'][i])] + P_temp
-        f = pd.DataFrame({'Data': M, 'PDF': P})
-        return PDF_generator_intermediate(f)
+        # Step2: concatenate 0s into 2 numpy
+        p1_delay = np.concatenate((self.delay, np.zeros(len(PDF2.pdf))))
+        p1_pdf = np.concatenate((self.pdf, np.zeros(len(PDF2.pdf))))
+        p2_delay = np.concatenate((PDF2.delay, np.zeros(len(self.pdf))))
+        p2_pdf = np.concatenate((PDF2.pdf, np.zeros(len(self.pdf))))
 
-    def sum_probability(self):
-        sum = 0.0
-        for p in self.data['PDF']:
-            sum = sum + p
-        return sum
+        # Step3: do pointers moving
+        for p in range(len(sum_delay)):
+            p1_pointer = 0
+            p2_pointer = p
+            while (p2_pointer >= 0):
+                sum = p1_delay[p1_pointer] + p2_delay[p2_pointer]
+                if sum >= min_of_sum:
+                    idx = int(round((sum - min_of_sum) / self.sample_dist, self.decimal_place))
+                    sum_pdf[idx] = p1_pdf[p1_pointer] * p2_pdf[p2_pointer] + sum_pdf[idx]
+                p2_pointer -= 1
+                p1_pointer += 1
 
-    #After this function, the size of data will be divide by N
-    def data_shrink_core(self, N):
-        k = 0
-        P = []
-        D = []
-        div, mod = divmod(len(self.data), N)
-        while k < div:
-            a = self.data.iloc[[N*k, N*(k+1)-1], :].mean()
-            P.append(a['PDF'] * N)
-            D.append(a['Data'])
-            k += 1
-        if mod != 0:
-            a = self.data.iloc[[N*div, (N*div+mod-1)], :].mean()
-            P.append(a['PDF'] * mod)
-            D.append(a['Data'])
-        self.data = pd.DataFrame({'Data': D, 'PDF': P})
+        R1 = PDF(sample_dist = self.sample_dist, delay = sum_delay, pdf = sum_pdf, decimal_place= self.decimal_place)
+        return R1
 
-    #2 mode for shrink, the default is fast and the other mode is 'precise' , in this mode, N is better to be power of 2
-    def data_shrink_mode(self,N,mode='fast'):
-        if mode == 'fast':
-            self.data_shrink_core(N)
-        elif mode == 'precise': # N must be power of 2
-            while N > 1:
-                N, mod = divmod(N, 2)
-                self.data_shrink_core(2)
+    def MAX(self, PDF2):
+        p1_min = round(self.delay.min(), 2)
+        p1_max = round(self.delay.max(), 2)
+        p2_min = round(PDF2.delay.min(), 2)
+        p2_max = round(PDF2.delay.max(), 2)
+
+        min_of_max = round(max(p1_min, p2_min), 2)
+        max_of_max = round(max(p1_max, p2_max), 2)
+        size = int((max_of_max - min_of_max) / sample_dist) + 1
+        max_delay = np.around(np.linspace(min_of_max, max_of_max, size, endpoint=True), decimals=2)
+        max_pdf = np.zeros(size)
+
+        for p in range(size):
+            if max_delay[p] <= p1_max:
+                idx1 = int(round((max_delay[p] - p1_min) / sample_dist, 2))
+                # looking for PDF2 first
+                print(p1_max)
+                idx2_list = np.where((PDF2.delay <= max_delay[p]))[0]
+                print(idx2_list)
+                sum = 0
+                for idx in idx2_list:
+                    sum = sum + PDF2.pdf[idx]
+                max_pdf[p] = max_pdf[p] + self.pdf[idx1] * sum
+
+            if max_delay[p] <= p2_max:
+                idx2 = int(round((max_delay[p] - p2_min) / sample_dist, 2))
+                idx1_list = np.where((self.delay < max_delay[p]))[0]
+                sum = 0
+                for idx in idx1_list:
+                    sum = sum + self.pdf[idx]
+                max_pdf[p] = max_pdf[p] + PDF2.pdf[idx2] * sum
+
+        R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
+        return R1
 
     def plot(self):
         plt.figure()
-        sns.scatterplot(self.data['Data'], self.data['PDF'], color="tan")
+        sns.lineplot(self.delay, self.pdf, color="tan")
         #plt.show()
-
-    def MAX_of_SUM(self,p2,pc):
-        ps1 = self.SUM(pc)
-        ps2 = p2.SUM(pc)
-        pms = ps1.MAX(ps2)
-        return pms
-
-    def SUM_of_MAX(self,p2,pc):
-        pm1 = self.MAX(pc)
-        pm2 = p2.MAX(pc)
-        psm = pm1.SUM(pm2)
-        return psm
-
-    def Result_plot(self,psm, pms):
-        plt.figure()
-        plt.subplot2grid((1,2), (0, 0), colspan=2)
-        #######Start to plot
-        SMP = plt.subplot2grid((1, 2), (0, 0))
-        SMP.title.set_text('MAX_of_SUM')
-        sns.scatterplot(psm.data['Data'], psm.data['PDF'], color="tan")
-
-        MSP = plt.subplot2grid((1, 2), (0, 1))
-        MSP.title.set_text('SUM_of_MAX')
-        sns.scatterplot(pms.data['Data'], pms.data['PDF'], color="teal")
 
 def read_sstalib(filename):
     sstalib = {}
@@ -205,27 +153,30 @@ def read_sstalib(filename):
     # 'XNOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}}
     return sstalib
 
-def PDF_generator(sstalib, gate,size):
-    p1 = PDF(mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'], size = size, f=None)
+def PDF_generator(sstalib, gate, size, sample_dist):
+    if size != None:
+        p1 = PDF(sample_dist = sample_dist, mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'], size = size)
+    else:
+        p1 = PDF(sample_dist = sample_dist, mu=sstalib[gate]['mu'], sigma=sstalib[gate]['sigma'])
     return p1
-def PDF_generator_intermediate(f):
-    p1 = PDF(mu = None, sigma = None, size = None, f = f)
-    return p1
+
 
 try:
-    sstalib = read_sstalib("tech10nm.sstalib")
-    p1 = PDF_generator(sstalib,'AND',5000)
-    #p1.plot()
+    sstalib = read_sstalib('tech10nm.sstalib')
+    sample_dist = 0.01
 
-    #print(p1.mu())
-    #print(p1.std())
-    print(len(p1.data))
-    print('before '+ str(p1.sum_probability()))
-    p1.data_shrink_mode(32, mode='fast')#precise will be good
-    print('after ' + str(p1.sum_probability()))
-    print(len(p1.data))
+    PDF1 = PDF_generator(sstalib, 'TEST', 201, sample_dist)
+    PDF2 = PDF_generator(sstalib, 'TEST1', 201, sample_dist)
 
-    #plt.show()
+
+    M1 = PDF1.MAX(PDF2)
+    M1.plot()
+
+    S1 = PDF1.SUM(PDF2)
+    S1.plot()
+
+    plt.show()
+
 
 except IOError:
     print("error in the code")
