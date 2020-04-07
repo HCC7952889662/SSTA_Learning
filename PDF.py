@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 from scipy.stats import norm
 import re
+from config import *
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
 sns.set(rc={'figure.figsize':(5,5)})
@@ -73,7 +74,10 @@ class PDF:
         #Return the result as PDF Obj
         R1 = PDF(sample_dist = self.sample_dist, delay = sum_delay, pdf = sum_pdf, decimal_place= self.decimal_place)
         return R1
-
+    
+    def __add__(self,PDF2): ###'+' operator overloading
+        return self.SUM(PDF2)
+    
     def MAX(self, PDF2):
         #Step1: find important parameters first
         p1_min = round(self.delay.min(), 2)
