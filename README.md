@@ -2,7 +2,7 @@
 ### This repostory is for SSTA team in EE595 at University of Southern California. 
 
 ## Members and Collaborative Team
-Project Instructors: Shahin Nazarian and MohammadSaeed Abrishami
+Project Instructors: Shahin Nazarian and Mohammad Saeed Abrishami
 
 Team Members:
 * [Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
