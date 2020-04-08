@@ -1,5 +1,6 @@
 from PDF import *
 from main import nodelist_test
+import math
 
 def set_nodes(nodelist_test):
     for i in nodelist_test:
@@ -25,12 +26,41 @@ def ckt_update(nodelist_test):
         print('{}\t{}\t{}\t'.format(i.gtype, i.lev, i.num),"completed")
 
 def plot_outputs(nodelist_test):
-    
+    total_plots=0
+    rows=0
+    cols=0
     for i in nodelist_test:     ##plotting the distribution of output nodes.
-        if(i.num==16):
-            i.total_dist.plot()
+        if(i.ntype=="PO"):
+            total_plots = total_plots + 1
+    if(total_plots>=4):
+        cols = 4 
+    else:
+        cols=total_plots
+    rows = rows + math.ceil(float(total_plots)/4)
+    plt.figure()
+    plt.subplot2grid((rows,cols),(0,0),colspan=cols)
+    r=0
+    c=0 
+    for i in nodelist_test:     ##plotting the distribution of output nodes.
+        if(i.ntype=="PO"):
+            plt.subplot2grid((rows,cols),(r,c))
             plt.title("plot for node %i"%(i.num))
-            plt.show()
+            plt.xlabel('Delay(ns)')
+            plt.ylabel('Probability')
+            sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='black')
+            c = c+1
+            if(c==4):
+                r = r+1
+                c=0
+    # plt.tight_layout()
+    plt.subplots_adjust(wspace=0.5,hspace=0.7)
+    plt.savefig('output_delay_dist.pdf')
+    plt.show()
+    # for i in nodelist_test:     ##plotting the distribution of output nodes.
+    #     if(i.num==16):
+    #         i.total_dist.plot()
+    #         plt.title("plot for node %i"%(i.num))
+    #         plt.show()
    
 try:
     sstalib = read_sstalib("tech10nm.sstalib")
