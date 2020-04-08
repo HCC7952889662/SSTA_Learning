@@ -121,7 +121,7 @@ class PDF:
                 for idx in idx1_list:
                     sum = sum + p1_pdf[idx]
                 max_pdf[p] = max_pdf[p] + p2_pdf[idx2] * sum
-
+        max_pdf = max_pdf / np.sum(max_pdf)
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
         return R1
@@ -129,7 +129,7 @@ class PDF:
     def data_shrink(self):
         del_list =[]
         for p in range(len(self.pdf)):
-            if self.pdf[p] < 0.0001:
+            if self.pdf[p] < 0.000000001:
                 del_list.append(p)
         #print(del_list)
         self.delay = np.delete(self.delay, del_list)
