@@ -44,8 +44,8 @@ class PDF:
 
     def SUM(self, PDF2):
         # Step1 : create numpy.array of the SUM result by defining the boundary of its possible values
-        min_of_sum = round(self.delay.min() + PDF2.delay.min(), self.decimal_place) # minimum boundary of SUM
-        max_of_sum = round(self.delay.max() + PDF2.delay.max(), self.decimal_place) # maximum boundary of SUM
+        min_of_sum = round(self.delay.min(), self.decimal_place) + round(PDF2.delay.min(), self.decimal_place) # minimum boundary of SUM
+        max_of_sum = round(self.delay.max(), self.decimal_place) + round(PDF2.delay.max(), self.decimal_place) # maximum boundary of SUM
         size = int((max_of_sum - min_of_sum) / sample_dist) + 1     #the size of SUM
         #Initializing delay and pdf numpy.array
         sum_delay = np.around(np.linspace(min_of_sum, max_of_sum, size, endpoint=True), decimals=self.decimal_place)
@@ -80,15 +80,21 @@ class PDF:
     
     def MAX(self, PDF2):
         #Step1: find important parameters first
-        p1_min = round(self.delay.min(), 2)
-        p1_max = round(self.delay.max(), 2)
-        p2_min = round(PDF2.delay.min(), 2)
-        p2_max = round(PDF2.delay.max(), 2)
+        p1_min = round(self.delay.min(), self.decimal_place)
+        p1_max = round(self.delay.max(), self.decimal_place)
+        p2_min = round(PDF2.delay.min(), self.decimal_place)
+        p2_max = round(PDF2.delay.max(), self.decimal_place)
+
+        #Prevent access to nonexistent value
+        p1_delay = np.concatenate((self.delay, np.zeros(1)))
+        p1_pdf = np.concatenate((self.pdf, np.zeros(1)))
+        p2_delay = np.concatenate((PDF2.delay, np.zeros(1)))
+        p2_pdf = np.concatenate((PDF2.pdf, np.zeros(1)))
 
         #Step2: create numpy.array of the MAX result by defining the boundary of its possible values
-        min_of_max = round(max(p1_min, p2_min), 2)
-        max_of_max = round(max(p1_max, p2_max), 2)
-        size = int((max_of_max - min_of_max) / sample_dist) + 1
+        min_of_max = round(max(p1_min, p2_min), self.decimal_place)
+        max_of_max = round(max(p1_max, p2_max), self.decimal_place)
+        size = int(round((max_of_max-min_of_max), self.decimal_place) / sample_dist)+1
         #Initializing the numpy array
         max_delay = np.around(np.linspace(min_of_max, max_of_max, size, endpoint=True), decimals=self.decimal_place)
         max_pdf = np.zeros(size)
@@ -97,22 +103,22 @@ class PDF:
         for p in range(size):
             #Check PDF2 first, so that we just have to ensure that the value exist in p1, otherwwise it is 0.
             if max_delay[p] <= p1_max:
-                idx1 = int(round((max_delay[p] - p1_min) / sample_dist, self.decimal_place))
+                idx1 = int(round((max_delay[p] - p1_min)/sample_dist, self.decimal_place))
                 # find indices of all values in p1 that its value is smaller than max value
-                idx2_list = np.where((PDF2.delay <= max_delay[p]))[0]   #include the same value
+                idx2_list = np.where((p2_delay <= max_delay[p]))[0]   #include the same value
                 sum = 0
                 for idx in idx2_list:
-                    sum = sum + PDF2.pdf[idx]
-                max_pdf[p] = max_pdf[p] + self.pdf[idx1] * sum
+                    sum = sum + p2_pdf[idx]
+                max_pdf[p] = max_pdf[p] + p1_pdf[idx1] * sum
             # Check PDF1, we just have to ensure that the value exist in p1, otherwwise it is 0.
             if max_delay[p] <= p2_max:
-                idx2 = int(round((max_delay[p] - p2_min) / sample_dist, self.decimal_place))
+                idx2 = int(round((max_delay[p] - p2_min), self.decimal_place) / sample_dist)
                 #find indices of all values in p1 that its value is smaller than max value
-                idx1_list = np.where((self.delay < max_delay[p]))[0]    #exclude the same value
+                idx1_list = np.where((p1_delay < max_delay[p]))[0]    #exclude the same value
                 sum = 0
                 for idx in idx1_list:
-                    sum = sum + self.pdf[idx]
-                max_pdf[p] = max_pdf[p] + PDF2.pdf[idx2] * sum
+                    sum = sum + p1_pdf[idx]
+                max_pdf[p] = max_pdf[p] + p2_pdf[idx2] * sum
 
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         return R1
@@ -176,12 +182,14 @@ try:
     sstalib = read_sstalib('tech10nm.sstalib')
     sample_dist = 0.01
 
-    PDF1 = PDF_generator(sstalib, 'TEST', 201, sample_dist)
-    PDF2 = PDF_generator(sstalib, 'TEST1', 201, sample_dist)
+    PDF1 = PDF_generator(sstalib, 'TEST', 401, sample_dist)
+    PDF2 = PDF_generator(sstalib, 'TEST1', 301, sample_dist)
 
 
     M1 = PDF1.MAX(PDF2)
     M1.plot()
+    print(len(M1.delay))
+    print(np.sum(M1.pdf))
 
     S1 = PDF1.SUM(PDF2)
     S1.plot()
