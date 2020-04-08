@@ -46,7 +46,7 @@ class PDF:
         # Step1 : create numpy.array of the SUM result by defining the boundary of its possible values
         min_of_sum = round(self.delay.min(), self.decimal_place) + round(PDF2.delay.min(), self.decimal_place) # minimum boundary of SUM
         max_of_sum = round(self.delay.max(), self.decimal_place) + round(PDF2.delay.max(), self.decimal_place) # maximum boundary of SUM
-        size = int((max_of_sum - min_of_sum) / sample_dist) + 1     #the size of SUM
+        size = int((max_of_sum - min_of_sum) / sample_dist) + 2     #the size of SUM +1
         #Initializing delay and pdf numpy.array
         sum_delay = np.around(np.linspace(min_of_sum, max_of_sum, size, endpoint=True), decimals=self.decimal_place)
         sum_pdf = np.zeros(size)
@@ -71,8 +71,10 @@ class PDF:
                     sum_pdf[idx] = p1_pdf[p1_pointer] * p2_pdf[p2_pointer] + sum_pdf[idx]
                 p2_pointer -= 1 # when this pointer go from p to 0, all overlapped parts are calculated
                 p1_pointer += 1
+
         #Return the result as PDF Obj
         R1 = PDF(sample_dist = self.sample_dist, delay = sum_delay, pdf = sum_pdf, decimal_place= self.decimal_place)
+        R1.data_shrink()
         return R1
     
     def __add__(self,PDF2): ###'+' operator overloading
@@ -86,15 +88,15 @@ class PDF:
         p2_max = round(PDF2.delay.max(), self.decimal_place)
 
         #Prevent access to nonexistent value
-        p1_delay = np.concatenate((self.delay, np.zeros(1)))
-        p1_pdf = np.concatenate((self.pdf, np.zeros(1)))
-        p2_delay = np.concatenate((PDF2.delay, np.zeros(1)))
-        p2_pdf = np.concatenate((PDF2.pdf, np.zeros(1)))
+        p1_delay = np.concatenate((self.delay, np.zeros(len(PDF2.pdf))))
+        p1_pdf = np.concatenate((self.pdf, np.zeros(len(PDF2.pdf))))
+        p2_delay = np.concatenate((PDF2.delay, np.zeros(len(self.pdf))))
+        p2_pdf = np.concatenate((PDF2.pdf, np.zeros(len(self.pdf))))
 
         #Step2: create numpy.array of the MAX result by defining the boundary of its possible values
         min_of_max = round(max(p1_min, p2_min), self.decimal_place)
         max_of_max = round(max(p1_max, p2_max), self.decimal_place)
-        size = int(round((max_of_max-min_of_max), self.decimal_place) / sample_dist)+1
+        size = int(round((max_of_max-min_of_max), self.decimal_place) / sample_dist) +2
         #Initializing the numpy array
         max_delay = np.around(np.linspace(min_of_max, max_of_max, size, endpoint=True), decimals=self.decimal_place)
         max_pdf = np.zeros(size)
@@ -121,7 +123,17 @@ class PDF:
                 max_pdf[p] = max_pdf[p] + p2_pdf[idx2] * sum
 
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
+        R1.data_shrink()
         return R1
+
+    def data_shrink(self):
+        del_list =[]
+        for p in range(len(self.pdf)):
+            if self.pdf[p] < 0.0001:
+                del_list.append(p)
+        #print(del_list)
+        self.delay = np.delete(self.delay, del_list)
+        self.pdf = np.delete(self.pdf, del_list)
 
     def plot(self, color='tan'):
         plt.figure()
@@ -180,22 +192,21 @@ def PDF_generator(sstalib, gate, size, sample_dist):
 
 try:
     sstalib = read_sstalib('tech10nm.sstalib')
-    sample_dist = 0.01
 
-    PDF1 = PDF_generator(sstalib, 'TEST', 401, sample_dist)
-    PDF2 = PDF_generator(sstalib, 'TEST1', 301, sample_dist)
+    #PDF1 = PDF_generator(sstalib, 'TEST', 401, sample_dist)
+    #PDF2 = PDF_generator(sstalib, 'TEST1', 301, sample_dist)
+    #print(len(PDF1.delay))
+    #PDF1.data_shrink()
+    #print(len(PDF1.delay))
+    #M1 = PDF1.MAX(PDF2)
+    #M1.plot()
+    #print(len(M1.delay))
+    #print(np.sum(M1.pdf))
 
+    #S1 = PDF1.SUM(PDF2)
+    #S1.plot()
 
-    M1 = PDF1.MAX(PDF2)
-    M1.plot()
-    print(len(M1.delay))
-    print(np.sum(M1.pdf))
-
-    S1 = PDF1.SUM(PDF2)
-    S1.plot()
-
-    plt.show()
-
+    #plt.show()
 
 except IOError:
     print("error in the code")
