@@ -190,8 +190,8 @@ def PDF_generator(sstalib, gate, size, sample_dist):
     return p1
 
 
-try:
-    sstalib = read_sstalib('tech10nm.sstalib')
+#try:
+    #sstalib = read_sstalib('tech10nm.sstalib')
 
     #PDF1 = PDF_generator(sstalib, 'TEST', 401, sample_dist)
     #PDF2 = PDF_generator(sstalib, 'TEST1', 301, sample_dist)
@@ -208,5 +208,5 @@ try:
 
     #plt.show()
 
-except IOError:
-    print("error in the code")
+#except IOError:
+#    print("error in the code")
