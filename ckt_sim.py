@@ -1,6 +1,7 @@
 from PDF import *
 from main import nodelist_test
 import math
+import timeit
 
 def set_nodes(nodelist_test):
     for i in nodelist_test:
@@ -21,8 +22,7 @@ def ckt_update(nodelist_test):
                     for k in range(0,len(i.unodes)-1):  ###find the max of all inputs.
                         max_of_inputs = (max_of_inputs).MAX(i.unodes[k+1].total_dist)      ##finding max of two inputs at a time
                         
-                ##Adding Max_of_inputs with gate_distribution
-                i.total_dist = (i.gate_dist)+(max_of_inputs)
+                i.total_dist = (i.gate_dist)+(max_of_inputs) ##Adding Max_of_inputs with gate_distribution
         print('{}\t{}\t{}\t'.format(i.gtype, i.lev, i.num),"completed")
 
 def plot_outputs(nodelist_test):
@@ -63,14 +63,21 @@ def plot_outputs(nodelist_test):
     #         plt.show()
    
 try:
+    start=timeit.default_timer()
+
     sstalib = read_sstalib("tech10nm.sstalib")
-    
+
     set_nodes(nodelist_test) ##initiallize the content of every node.
 
     ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
-    
+
     plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
-    
+
+    stop=timeit.default_timer()
+    elapsed_time = stop-start
+    print("Simulation Time: ",elapsed_time," seconds")
+
     print("simulation ends.")
+
 except IOError:
     print("error in the code")
