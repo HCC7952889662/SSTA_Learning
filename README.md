@@ -17,7 +17,7 @@ python3 ckt_sim.py
 ```
 
 ## SSTA System Diagram
-![Diagram](/images/system overview.PNG)
+![Diagram](/images/System_overview.PNG)
 <p align="right">by ZhiYu</p>
 
 ## PDF(Probability Density Function) Object
