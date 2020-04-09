@@ -42,6 +42,9 @@ class PDF:
             c += 1
         return c
 
+    def mu(self):
+        return np.mean(self.delay)
+
     def SUM(self, PDF2):
         # Step1 : create numpy.array of the SUM result by defining the boundary of its possible values
         min_of_sum = round(self.delay.min(), self.decimal_place) + round(PDF2.delay.min(), self.decimal_place) # minimum boundary of SUM
