@@ -18,6 +18,34 @@ def circuit_parse_levelization(filename):
     nodelist_order = lev(nodelist_test, Nnodes)
     return(nodelist_test)
 
+def set_means(nodelist_test):
+    for i in nodelist_test:
+        if(i.gtype!='BRCH'):
+            if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
+                i.total_mean=sstalib['IPT']['mu']   
+            else:   ## All other gtype are gates (except BRCH)
+                i.gate_mean=sstalib[i.gtype]['mu']
+                
+def means_update(nodelist_test):
+    for i in nodelist_test:
+        if(i.gtype!='IPT'):
+            if(i.gtype=='BRCH'):    ###For 'BRCH' type gates simply update their total_dist with whatever node they are connected to on input side.
+                i.total_mean=i.unodes[0].total_mean
+            else:
+                max_of_inputs_means = (i.unodes[0].total_mean)##1 input gates (NOT or BUFF)
+                if(len(i.unodes)>1):  ##for multi-input gates    
+                    for k in range(0,len(i.unodes)-1):  ###find the max of all inputs.
+                        max_of_inputs_means = (max_of_inputs_means) if(max_of_inputs_means>i.unodes[k+1].total_mean) else (i.unodes[k+1].total_mean)      ##finding max of two inputs at a time
+                i.total_mean= (i.gate_mean)+max_of_inputs_means ##Adding Max_of_inputs with gate_distribution
+                
+def find_mean(nodelist_test):
+    set_means(nodelist_test)
+    means_update(nodelist_test)
+    #for i in nodelist_test:     
+     #   if(i.ntype=="PO"):
+      #      print("Mean value of node %i using STA method is %f"%(i.num,i.total_mean))
+    return
+
 def set_nodes(nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
@@ -67,7 +95,9 @@ def plot_outputs(nodelist_test):
     for i in nodelist_test:     ##plotting the distribution of output nodes.
         if(i.ntype=="PO"):
             plt.subplot2grid((rows,cols),(r,c))
-            plt.title("plot for node %i"%(i.num))
+            plt.title("Mean delay value of node %i using STA method is %f"%(i.num,i.total_mean))
+            plt.suptitle("plots for output nodes") # %i"%(i.num))
+            #plt.title("plot for node %i"%(i.num))
             plt.xlabel('Delay(ns)')
             plt.ylabel('Probability')
             sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='teal')
@@ -100,6 +130,7 @@ try:
     stop=timeit.default_timer()
     elapsed_time = stop-start
     print("Simulation Time: ",elapsed_time," seconds")
+    find_mean(nodelist_test)
     plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
     print("simulation ends.")
 
