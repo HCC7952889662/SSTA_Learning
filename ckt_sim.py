@@ -88,9 +88,9 @@ def plot_outputs(nodelist_test):
 try:
     start=timeit.default_timer()
 
-    sstalib = read_sstalib("tech10nm.sstalib")
+    sstalib = read_sstalib(sys.argv[1])
 
-    nodelist_test = circuit_parse_levelization(sys.argv[1])
+    nodelist_test = circuit_parse_levelization(sys.argv[2])
     set_nodes(nodelist_test) ##initiallize the content of every node.
 
     ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
