@@ -52,4 +52,6 @@ data_shrink(): This function delete delay delay in PDF whose probability is too 
 2. SUM_of_MAX(PDF p2, PDF pc): do the SUM(self,pc) ,SUM(p2,pc) and do the MAX of those 2 sum results and return the final result. Return Type: PDF Object
 These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
 
+## Sample Results for c6288 circuit:
+![Diagram](/images/c6288.png)
 
