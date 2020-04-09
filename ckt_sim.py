@@ -4,6 +4,7 @@ import timeit
 import seaborn as sns
 from cread import cread
 import sys
+from lev import lev
 
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
@@ -13,6 +14,8 @@ sns.set(rc={'figure.figsize':(6,6)})
 def circuit_parse_levelization(filename):
     input_nodes = []
     nodelist_test = cread(filename,input_nodes)
+    Nnodes = len(nodelist_test)
+    nodelist_order = lev(nodelist_test, Nnodes)
     return(nodelist_test)
 
 def set_nodes(nodelist_test):
