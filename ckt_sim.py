@@ -50,9 +50,9 @@ def set_nodes(nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
             if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
-                i.total_dist=PDF_generator(sstalib,i.gtype,samples,sample_dist)    
+                i.total_dist=PDF_generator(sstalib,i.gtype,sample_dist)
             else:   ## All other gtype are gates (except BRCH)
-                i.gate_dist=PDF_generator(sstalib,i.gtype,samples,sample_dist)       ###every node gets its gate_dist distribution data except for BRCH
+                i.gate_dist=PDF_generator(sstalib,i.gtype,sample_dist)       ###every node gets its gate_dist distribution data except for BRCH
 
 def ckt_update(nodelist_test):
     for i in nodelist_test:
@@ -95,7 +95,7 @@ def plot_outputs(nodelist_test):
     for i in nodelist_test:     ##plotting the distribution of output nodes.
         if(i.ntype=="PO"):
             plt.subplot2grid((rows,cols),(r,c))
-            plt.title("Mean delay value of node %i using STA method is %f"%(i.num,i.total_mean))
+            plt.title("STA mu of node %i : %f"%(i.num,i.total_mean))
             plt.suptitle("plots for output nodes") # %i"%(i.num))
             #plt.title("plot for node %i"%(i.num))
             plt.xlabel('Delay(ns)')

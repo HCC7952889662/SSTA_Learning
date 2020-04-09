@@ -10,7 +10,7 @@ sns.set(rc={'figure.figsize':(5,5)})
 
 ##class PDF
 class PDF:
-    def __init__(self, sample_dist, mu=None, sigma=None, size= 101, delay=None, pdf=None, decimal_place= None):
+    def __init__(self, sample_dist, mu=None, sigma=None, delay=None, pdf=None, decimal_place= None):
         if delay is not None and pdf is not None:
             self.delay = delay
             self.pdf = pdf
@@ -22,10 +22,13 @@ class PDF:
             else:
                 self.sample_dist = sample_dist
                 self.decimal_place = self.decimal_place_generator()
-                self.delay, self.pdf = self.NORM(mu, sigma, sample_dist, size)
+                self.delay, self.pdf = self.NORM(mu, sigma, sample_dist)
+                self.data_shrink()
 
     #Generating the PDF function by the given mu  sigma and size
-    def NORM(self, mu, sigma, sample_dist, size):
+    def NORM(self, mu, sigma, sample_dist):
+        range = (mu + 4 * sigma)*2
+        size = (range/sample_dist)+1
         k = (size - 1) * sample_dist / 2
         # print(k)
         x = np.arange(mu - k, mu + k, sample_dist)
@@ -44,6 +47,9 @@ class PDF:
 
     def mu(self):
         return np.mean(self.delay)
+
+    def std(self):
+        return np.std(self.delay)
 
     def SUM(self, PDF2):
         # Step1 : create numpy.array of the SUM result by defining the boundary of its possible values
@@ -124,19 +130,16 @@ class PDF:
                 for idx in idx1_list:
                     sum = sum + p1_pdf[idx]
                 max_pdf[p] = max_pdf[p] + p2_pdf[idx2] * sum
-        max_pdf = max_pdf / np.sum(max_pdf)
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
         return R1
 
     def data_shrink(self):
-        del_list =[]
-        for p in range(len(self.pdf)):
-            if self.pdf[p] < 0.000000001:
-                del_list.append(p)
-        #print(del_list)
-        self.delay = np.delete(self.delay, del_list)
-        self.pdf = np.delete(self.pdf, del_list)
+        for p in self.pdf:
+            if p < P_tolerance:
+                self.delay = np.delete(self.delay, np.where(self.pdf == p))
+                self.pdf = np.delete(self.pdf, np.where(self.pdf == p))
+        self.pdf = self.pdf / np.sum(self.pdf)
 
     def plot(self, color='tan'):
         plt.figure()
@@ -185,19 +188,17 @@ def read_sstalib(filename):
     # 'XNOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}}
     return sstalib
 
-def PDF_generator(sstalib, gate, size, sample_dist):
-    if size != None:
-        p1 = PDF(sample_dist = sample_dist, mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'], size = size)
-    else:
-        p1 = PDF(sample_dist = sample_dist, mu=sstalib[gate]['mu'], sigma=sstalib[gate]['sigma'])
-    return p1
+def PDF_generator(sstalib, gate, sample_dist):
+    return PDF(sample_dist = sample_dist, mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'])
 
 
 #try:
     #sstalib = read_sstalib('tech10nm.sstalib')
 
-    #PDF1 = PDF_generator(sstalib, 'TEST', 401, sample_dist)
-    #PDF2 = PDF_generator(sstalib, 'TEST1', 301, sample_dist)
+    #PDF1 = PDF_generator(sstalib, 'TEST', sample_dist)
+    #print(PDF1.std())
+    #PDF2 = PDF_generator(sstalib, 'TEST1', sample_dist)
+    #PDF1.plot()
     #print(len(PDF1.delay))
     #PDF1.data_shrink()
     #print(len(PDF1.delay))
@@ -208,8 +209,8 @@ def PDF_generator(sstalib, gate, size, sample_dist):
 
     #S1 = PDF1.SUM(PDF2)
     #S1.plot()
-
+    #python3 ckt_sim.py tech10nm.sstalib c6288.ckt658
     #plt.show()
 
 #except IOError:
-#    print("error in the code")
+    #print("error in the code")
