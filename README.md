@@ -5,7 +5,7 @@
 Project Instructors: Shahin Nazarian and Mohammad Saeed Abrishami
 
 Team Members:
-![Diagram](/images/GitHub-Mark-120px-plus.png)[Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
+* [Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
 * [Hsu-Cheng Cheng(Alex)](https://github.com/HCC7952889662)
 * [Harmanpreet Singh Kalsi](https://github.com/hkalsi-usc)
 
@@ -56,3 +56,8 @@ These 2 functions are designed for the experiment in PHASE I project, which is t
 Simulation time : 148.13s
 ![Diagram](/images/c6288.png)
 
+## Reference:
+[1]  J.-H. Liu, A.-S. Hong, L. Chen, and C. Chen, “Process-variation statisticalmodeling for vlsi timing analysis,” 04 2008, pp. 730 – 733.
+[2]  M.LLC.(1999)MSWindowsNTkerneldescription.[Online].    Available: http://web.archive.org/web/20080207010024/http://www.808multimedia.com/winnt/kernel.htm
+[3]  “Grinstead and Snell’s Introduction to Probability,” Tech. Rep., 2006.
+[4]  D. Blaauw, K. Chopra, A. Srivastava, and L. Scheffer, “Statistical timinganalysis:  From  basic  principles  to  state  of  the  art,”Computer-AidedDesign of Integrated Circuits and Systems, IEEE Transactions on, vol. 27,pp. 589 – 607, 05 2008.[5]  “(No   Title).”   [Online].   Available:   http://sportlab.usc.edu/∼mitsushij/benchmarks.html[6]  V.  Khandelwal  and  A.  Srivastava,  “A  general  framework  for  accuratestatistical  timing  analysis  considering  correlations,”  inProceedings -Design Automation Conference.New  York,  New  York,  USA:  ACMPress, 2005, pp. 89–94. [Online]. Available: http://portal.acm.org/citation.cfm?doid=1065579.1065607
