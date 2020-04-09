@@ -12,7 +12,7 @@ Team Members:
 Collaborative Team : ATPG Team
 
 ## Fast Test of SSTA calculation:
-```python
+```Bash
 python3 ckt_sim.py
 ```
 
