@@ -1,7 +1,18 @@
 from PDF import *
-from main import nodelist_test
 import math
 import timeit
+import seaborn as sns
+from cread import cread
+
+sns.set(color_codes=True,style="white")
+# settings for seaborn plot sizes
+sns.set(rc={'figure.figsize':(6,6)})
+
+
+def circuit_parse_levelization(filename):
+    input_nodes = []
+    nodelist_test = cread(filename,input_nodes)
+    return(nodelist_test)
 
 def set_nodes(nodelist_test):
     for i in nodelist_test:
@@ -47,7 +58,7 @@ def plot_outputs(nodelist_test):
             plt.title("plot for node %i"%(i.num))
             plt.xlabel('Delay(ns)')
             plt.ylabel('Probability')
-            sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='black')
+            sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='teal')
             c = c+1
             if(c==4):
                 r = r+1
@@ -67,6 +78,7 @@ try:
 
     sstalib = read_sstalib("tech10nm.sstalib")
 
+    nodelist_test = circuit_parse_levelization('c17.ckt658')
     set_nodes(nodelist_test) ##initiallize the content of every node.
 
     ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
@@ -81,3 +93,5 @@ try:
 
 except IOError:
     print("error in the code")
+
+#6270 6280 6287 6288
