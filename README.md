@@ -56,7 +56,7 @@ These 2 functions are designed for the experiment in PHASE I project, which is t
 
 ## Sample Results for c6288 circuit:
 Simulation time : 391.06s
-![Diagram](/images/c6288.png)
+![c6288](/images/c6288_re.png)
 
 ## Reference:
 [1]  J.-H. Liu, A.-S. Hong, L. Chen, and C. Chen, “Process-variation statisticalmodeling for vlsi timing analysis,” 04 2008, pp. 730 – 733.
