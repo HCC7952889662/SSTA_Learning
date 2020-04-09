@@ -5,7 +5,7 @@
 Project Instructors: Shahin Nazarian and Mohammad Saeed Abrishami
 
 Team Members:
-* [Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
+[Diagram](/images/GitHub-Mark-120px-plus.png)[Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
 * [Hsu-Cheng Cheng(Alex)](https://github.com/HCC7952889662)
 * [Harmanpreet Singh Kalsi](https://github.com/hkalsi-usc)
 
