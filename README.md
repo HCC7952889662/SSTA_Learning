@@ -13,9 +13,12 @@ Collaborative Team : ATPG Team
 
 ## Fast Test of SSTA calculation:
 ```Bash
-python3 ckt_sim.py
+python3 main.py <Library File PATH> <Circuit File Path>
 ```
-
+Ex:
+```Bash
+python3 main.py ./tech10nm.sstalib ./circuit/c17.ckt658
+```
 ## SSTA System Diagram
 ![Diagram](/images/System_overview.PNG)
 <p align="right">by ZhiYu</p>
