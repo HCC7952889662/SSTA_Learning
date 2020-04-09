@@ -55,7 +55,7 @@ data_shrink(): This function delete delay data in PDF whose probability is small
 These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
 
 ## Sample Results for c6288 circuit:
-Simulation time : 148.13s
+Simulation time : 391.06s
 ![Diagram](/images/c6288.png)
 
 ## Reference:
