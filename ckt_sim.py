@@ -1,15 +1,54 @@
 from PDF import *
 import math
-import timeit
 import seaborn as sns
 from cread import cread
-import sys
 from lev import lev
 
-# Figure Setting
-sns.set(color_codes=True,style="white")
-# settings for seaborn plot sizes
-sns.set(rc={'figure.figsize':(6,6)})
+# Library Read Function : return a Dict
+def read_sstalib(filename):
+    sstalib = {}
+    infile = open(filename)
+    count = 0
+    #condition on cell form to how to read it.
+    for line in infile:
+        if line != "":
+            if re.match(r'^#', line):
+                pass
+            else:
+                line_syntax =  re.match(r'cell (.*):',line, re.IGNORECASE)
+                if line_syntax:
+                    gate = line_syntax.group(1)
+                    count+=1
+
+                line_syntax = re.match(r'.*form = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    form = line_syntax.group(1)
+                    count += 1
+
+                line_syntax = re.match(r'.*mu = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    mu = float(line_syntax.group(1))
+                    count += 1
+
+                line_syntax = re.match(r'.*sigma = (.*)', line, re.IGNORECASE)
+                if line_syntax:
+                    sigma = float(line_syntax.group(1))
+                    count += 1
+
+                if count == 4:
+                    sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
+                    count = 0
+    # it should return an object of Dict
+    #{'IPT': {'form': 'normal', 'mu': '2', 'sigma': '0.5'},  'NOT': {'form': 'normal', 'mu': '4', 'sigma': '0.5'},
+    # 'NAND': {'form': 'normal', 'mu': '6', 'sigma': '0.8'}, 'AND': {'form': 'normal', 'mu': '6.5', 'sigma': '0.8'},
+    # 'NOR': {'form': 'normal', 'mu': '7', 'sigma': '0.8'},  'OR': {'form': 'normal', 'mu': '7.5', 'sigma': '0.8'},
+    # 'XOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}, 'BUFF': {'form': 'normal', 'mu': '2.5', 'sigma': '0.5'},
+    # 'XNOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}}
+    return sstalib
+
+# PDF Generating function
+def PDF_generator(sstalib, gate, sample_dist):
+    return PDF(sample_dist = sample_dist, mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'])
 
 # Call ATPG team Function for circuit parse
 def circuit_parse_levelization(filename):
@@ -20,7 +59,7 @@ def circuit_parse_levelization(filename):
     return(nodelist_test)
 
 # STA Time analysis
-def set_means(nodelist_test):
+def set_means(sstalib, nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
             if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
@@ -40,15 +79,15 @@ def means_update(nodelist_test):
                         max_of_inputs_means = (max_of_inputs_means) if(max_of_inputs_means>i.unodes[k+1].total_mean) else (i.unodes[k+1].total_mean)      ##finding max of two inputs at a time
                 i.total_mean= (i.gate_mean)+max_of_inputs_means ##Adding Max_of_inputs with gate_distribution
 
-def find_mean(nodelist_test):
-    set_means(nodelist_test)
+def find_mean(sstalib, nodelist_test):
+    set_means(sstalib, nodelist_test)
     means_update(nodelist_test)
     #for i in nodelist_test:     
     #   if(i.ntype=="PO"):
     #      print("Mean value of node %i using STA method is %f"%(i.num,i.total_mean))
     #return
 
-def set_nodes(nodelist_test):
+def set_nodes(sstalib, nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
             if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
@@ -117,24 +156,24 @@ def plot_outputs(nodelist_test):
     #         plt.title("plot for node %i"%(i.num))
     #         plt.show()
    
-try:
-    start=timeit.default_timer()
+#try:
+    #start=timeit.default_timer()
 
-    sstalib = read_sstalib(sys.argv[1])
+    #sstalib = read_sstalib(sys.argv[1])
 
-    nodelist_test = circuit_parse_levelization(sys.argv[2])
-    set_nodes(nodelist_test) ##initiallize the content of every node.
+    #nodelist_test = circuit_parse_levelization(sys.argv[2])
+    #set_nodes(nodelist_test) ##initiallize the content of every node.
 
-    ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
+    #ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
 
-    stop=timeit.default_timer()
-    elapsed_time = stop-start
-    print("Simulation Time: ",elapsed_time," seconds")
-    find_mean(nodelist_test)
-    plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
-    print("simulation ends.")
+    #stop=timeit.default_timer()
+    #elapsed_time = stop-start
+    #print("Simulation Time: ",elapsed_time," seconds")
+    #find_mean(nodelist_test)
+    #plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
+    #print("simulation ends.")
 
-except IOError:
-    print("error in the code")
+#except IOError:
+    #print("error in the code")
 
 

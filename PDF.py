@@ -4,9 +4,6 @@ import seaborn as sns
 from scipy.stats import norm
 import re
 from config import *
-sns.set(color_codes=True,style="white")
-# settings for seaborn plot sizes
-sns.set(rc={'figure.figsize':(5,5)})
 
 ##class PDF
 class PDF:
@@ -146,53 +143,10 @@ class PDF:
         sns.lineplot(self.delay, self.pdf, color=color)
         #plt.show()
 
-def read_sstalib(filename):
-    sstalib = {}
-    infile = open(filename)
-    count = 0
-    #condition on cell form to how to read it.
-    for line in infile:
-        if line != "":
-            if re.match(r'^#', line):
-                pass
-            else:
-                #print(line)
-                line_syntax =  re.match(r'cell (.*):',line, re.IGNORECASE)
-                if line_syntax:
-                    gate = line_syntax.group(1)
-                    count+=1
-
-                line_syntax = re.match(r'.*form = (.*)', line, re.IGNORECASE)
-                if line_syntax:
-                    form = line_syntax.group(1)
-                    count += 1
-
-                line_syntax = re.match(r'.*mu = (.*)', line, re.IGNORECASE)
-                if line_syntax:
-                    mu = float(line_syntax.group(1))
-                    count += 1
-
-                line_syntax = re.match(r'.*sigma = (.*)', line, re.IGNORECASE)
-                if line_syntax:
-                    sigma = float(line_syntax.group(1))
-                    count += 1
-
-                if count == 4:
-                    sstalib[gate] = {'form': form, 'mu': mu, 'sigma': sigma}
-                    count = 0
-    # it should return an object of Dict
-    #{'IPT': {'form': 'normal', 'mu': '2', 'sigma': '0.5'},  'NOT': {'form': 'normal', 'mu': '4', 'sigma': '0.5'},
-    # 'NAND': {'form': 'normal', 'mu': '6', 'sigma': '0.8'}, 'AND': {'form': 'normal', 'mu': '6.5', 'sigma': '0.8'},
-    # 'NOR': {'form': 'normal', 'mu': '7', 'sigma': '0.8'},  'OR': {'form': 'normal', 'mu': '7.5', 'sigma': '0.8'},
-    # 'XOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}, 'BUFF': {'form': 'normal', 'mu': '2.5', 'sigma': '0.5'},
-    # 'XNOR': {'form': 'normal', 'mu': '12', 'sigma': '1.5'}}
-    return sstalib
-
-def PDF_generator(sstalib, gate, sample_dist):
-    return PDF(sample_dist = sample_dist, mu = sstalib[gate]['mu'], sigma = sstalib[gate]['sigma'])
-
-
 #try:
+    #sns.set(color_codes=True, style="white")
+    # settings for seaborn plot sizes
+    #sns.set(rc={'figure.figsize': (5, 5)})
     #sstalib = read_sstalib('tech10nm.sstalib')
 
     #PDF1 = PDF_generator(sstalib, 'TEST', sample_dist)
