@@ -3,6 +3,7 @@ import math
 import timeit
 import seaborn as sns
 from cread import cread
+import sys
 
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
@@ -35,6 +36,14 @@ def ckt_update(nodelist_test):
                         
                 i.total_dist = (i.gate_dist)+(max_of_inputs) ##Adding Max_of_inputs with gate_distribution
         print('{}\t{}\t{}\t'.format(i.gtype, i.lev, i.num),"completed")
+        if(i.num==int(sys.argv[1])):
+            plt.figure()
+            plt.title("plot for node %i"%(i.num))
+            plt.xlabel('Delay(ns)')
+            plt.ylabel('Probability')
+            sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='teal')
+            plt.show()
+            return
 
 def plot_outputs(nodelist_test):
     total_plots=0
@@ -78,12 +87,12 @@ try:
 
     sstalib = read_sstalib("tech10nm.sstalib")
 
-    nodelist_test = circuit_parse_levelization('c17.ckt658')
+    nodelist_test = circuit_parse_levelization(sys.argv[2]+'.ckt658')
     set_nodes(nodelist_test) ##initiallize the content of every node.
 
     ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
 
-    plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
+    # plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
 
     stop=timeit.default_timer()
     elapsed_time = stop-start
