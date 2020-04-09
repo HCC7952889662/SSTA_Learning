@@ -6,11 +6,12 @@ from cread import cread
 import sys
 from lev import lev
 
+# Figure Setting
 sns.set(color_codes=True,style="white")
 # settings for seaborn plot sizes
 sns.set(rc={'figure.figsize':(6,6)})
 
-
+# Call ATPG team Function for circuit parse
 def circuit_parse_levelization(filename):
     input_nodes = []
     nodelist_test = cread(filename,input_nodes)
@@ -18,6 +19,7 @@ def circuit_parse_levelization(filename):
     nodelist_order = lev(nodelist_test, Nnodes)
     return(nodelist_test)
 
+# STA Time analysis
 def set_means(nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
@@ -25,7 +27,7 @@ def set_means(nodelist_test):
                 i.total_mean=sstalib['IPT']['mu']   
             else:   ## All other gtype are gates (except BRCH)
                 i.gate_mean=sstalib[i.gtype]['mu']
-                
+
 def means_update(nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='IPT'):
@@ -37,14 +39,14 @@ def means_update(nodelist_test):
                     for k in range(0,len(i.unodes)-1):  ###find the max of all inputs.
                         max_of_inputs_means = (max_of_inputs_means) if(max_of_inputs_means>i.unodes[k+1].total_mean) else (i.unodes[k+1].total_mean)      ##finding max of two inputs at a time
                 i.total_mean= (i.gate_mean)+max_of_inputs_means ##Adding Max_of_inputs with gate_distribution
-                
+
 def find_mean(nodelist_test):
     set_means(nodelist_test)
     means_update(nodelist_test)
     #for i in nodelist_test:     
-     #   if(i.ntype=="PO"):
-      #      print("Mean value of node %i using STA method is %f"%(i.num,i.total_mean))
-    return
+    #   if(i.ntype=="PO"):
+    #      print("Mean value of node %i using STA method is %f"%(i.num,i.total_mean))
+    #return
 
 def set_nodes(nodelist_test):
     for i in nodelist_test:
@@ -54,6 +56,7 @@ def set_nodes(nodelist_test):
             else:   ## All other gtype are gates (except BRCH)
                 i.gate_dist=PDF_generator(sstalib,i.gtype,sample_dist)       ###every node gets its gate_dist distribution data except for BRCH
 
+# SSTA Time analysis
 def ckt_update(nodelist_test):
     for i in nodelist_test:
         if(i.gtype!='IPT'):
@@ -79,7 +82,6 @@ def ckt_update(nodelist_test):
 def plot_outputs(nodelist_test):
     total_plots=0
     rows=0
-    cols=0
     for i in nodelist_test:     ##plotting the distribution of output nodes.
         if(i.ntype=="PO"):
             total_plots = total_plots + 1
@@ -125,8 +127,6 @@ try:
 
     ckt_update(nodelist_test) ## update the content of every node as we parse through the circuit level by level.
 
-    
-
     stop=timeit.default_timer()
     elapsed_time = stop-start
     print("Simulation Time: ",elapsed_time," seconds")
@@ -137,4 +137,4 @@ try:
 except IOError:
     print("error in the code")
 
-#6270 6280 6287 6288
+
