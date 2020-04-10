@@ -30,7 +30,7 @@ In our implementation, we sample the PDF created by a given PDF type, mean value
 
 
 ## SUM Function
-![Diagram](/images/SUM_Function.png)
+![Diagram](/images/sum.png)
 
 To implement the SUM function, we first find out the range of delays that are possible in SUM Function. The lowest delay of the SUM will be the SUM of minimum of delay of 2 PDFS and the highest delay of the SUM will be the SUM of maximum of delay of 2 PDFS. After getting the range, we can acquire all possible delays of SUM by dividing the range with Sample_Dist. Next, we used 2 pointers to implement Convolution. 'P1' is to point at where the tail of the second input, and the other pointer is to calculate the overlapped delays.
 
