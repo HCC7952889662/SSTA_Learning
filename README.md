@@ -29,8 +29,8 @@ python3 main.py ./tech10nm.sstalib ./circuit/c17.ckt658
 In our implementation, we sample the PDF created by a given PDF type, mean value and std, by using the term called "Sample_Dist", which displays the distance between 2 sample points. The 'Sample_Dist' will become a constant during the whole circuit analysis, and this will offer huge advantages over SUM and MAX implementation. However, though this way gives us a promising way to decrease the distortion of the PDF, the total number of sampling points will become extremely large when the std become huge, thus we need the data_shrink() function to drop some delay points whose probability are lower than P_tolerance.
 
 
-## SUM Function
-![Diagram](/images/sum.png)
+## SUM & MAX Function
+![Diagram](/images/sum.png) ![Diagram](/images/max.png)
 
 To implement the SUM function, we first find out the range of delays that are possible in SUM Function. The lowest delay of the SUM will be the SUM of minimum of delay of 2 PDFS and the highest delay of the SUM will be the SUM of maximum of delay of 2 PDFS. After getting the range, we can acquire all possible delays of SUM by dividing the range with Sample_Dist. Next, we used 2 pointers to implement Convolution. 'P1' is to point at where the tail of the second input, and the other pointer is to calculate the overlapped delays.
 
