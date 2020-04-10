@@ -23,6 +23,11 @@ python3 main.py ./tech10nm.sstalib ./circuit/c17.ckt658
 ![Diagram](/images/System_overview.PNG)
 <p align="right">by ZhiYu</p>
 
+## PDF(Probability Density Function) Sampling Diagram
+![Diagram](/images/Sampling.png)
+
+In our implementation, we sample the PDF created by a given PDF type, mean value and std, by using the term called "Sample_Dist", which displays the distance between 2 sample points. The 'Sample_Dist' will become a constant during the whole circuit analysis, and this will offer huge advantages over SUM and MAX implementation. However, though this way gives us a promising way to decrease the distortion of the PDF, the total number of sampling points will become extremely large when the std become huge, thus we need the data_shrink() function to drop some delay points whose probability are lower than P_tolerance.
+
 ## PDF(Probability Density Function) Object
 In the PDF object, the constructor will create a PDF according to the given 5 arguments.
 1. mu : mu is the mean value of a giveen data.
