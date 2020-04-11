@@ -8,6 +8,7 @@ Team Members:
 * [Zhiyu Chen(Andrew)](https://github.com/Zhiyu-Chen-Github)
 * [Hsu-Cheng Cheng(Alex)](https://github.com/HCC7952889662)
 * [Harmanpreet Singh Kalsi](https://github.com/hkalsi-usc)
+* [Lingjun Sun](https://github.com/sunlingjun)
 
 Collaborative Team : USC ATPG Team
 
