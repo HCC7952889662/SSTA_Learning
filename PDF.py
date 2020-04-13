@@ -24,15 +24,16 @@ class PDF:
 
     #Generating the PDF function by the given mu  sigma and size
     def NORM(self, mu, sigma, sample_dist):
-        range = (mu + 4 * sigma)*2
-        size = (range/sample_dist)+1
-        k = (size - 1) * sample_dist / 2
-        # print(k)
-        x = np.arange(mu - k, mu + k, sample_dist)
-        x = np.around(x, decimals=self.decimal_place)
-        px = norm.pdf(x, loc=mu, scale=sigma)
-        # px = px / sum(px)
-        return x, px
+        range = (mu + 4 * sigma) * 2
+        size = (range / sample_dist)
+        k = (size) * sample_dist / 2
+        x = np.around(np.arange(mu - k, mu + k, sample_dist), decimals=self.decimal_place)
+        p = self.n_pdf(x, mu, sigma)
+        return x, p
+
+    def n_pdf(self, x, mean, std):
+        p = (1 / (std * np.sqrt(2 * np.pi)) * np.exp(- (x - mean) ** 2 / (2 * std ** 2)))*self.sample_dist
+        return p
 
     def decimal_place_generator(self):
         c = 0
@@ -49,16 +50,21 @@ class PDF:
         return np.std(self.delay)
 
     def SUM(self, PDF2):
-        # Step1 : create numpy.array of the SUM result by defining the boundary of its possible values
-        min_of_sum = round(self.delay.min(), self.decimal_place) + round(PDF2.delay.min(), self.decimal_place) # minimum boundary of SUM
-        max_of_sum = round(self.delay.max(), self.decimal_place) + round(PDF2.delay.max(), self.decimal_place) # maximum boundary of SUM
-        size = int((max_of_sum - min_of_sum) / sample_dist) + 2     #the size of SUM +1
-        #Initializing delay and pdf numpy.array
+        # Step0: find important parameters first
+        p1_min = round(self.delay.min(), self.decimal_place)
+        p1_max = round(self.delay.max(), self.decimal_place)
+        p2_min = round(PDF2.delay.min(), self.decimal_place)
+        p2_max = round(PDF2.delay.max(), self.decimal_place)
+
+        # Step1 : create numpy.array of the SUM result by defining the boundary of its possible value
+        min_of_sum = round(p1_min + p2_min, self.decimal_place)  # minimum boundary of SUM
+        max_of_sum = round(p1_max + p2_max, self.decimal_place)  # maximum boundary of SUM
+        size = int((max_of_sum - min_of_sum) / sample_dist) + 1  # the size of SUM +1
+        # Initializing delay and pdf numpy.array
         sum_delay = np.around(np.linspace(min_of_sum, max_of_sum, size, endpoint=True), decimals=self.decimal_place)
         sum_pdf = np.zeros(size)
 
         # Step2: concatenate 0s into 2 Inputs to make them size equal to (size1+size2)
-
         p1_delay = np.concatenate((self.delay, np.zeros(len(PDF2.pdf))))
         p1_pdf = np.concatenate((self.pdf, np.zeros(len(PDF2.pdf))))
         p2_delay = np.concatenate((PDF2.delay, np.zeros(len(self.pdf))))
@@ -66,67 +72,83 @@ class PDF:
 
         # Step3: do pointers moving
         # when p = 0, the head of the second input is alighed with the tail of the first input
-        for p in range(len(sum_delay)): #the second input moves p sample_dist
+        for p in range(len(sum_delay)):  # the second input moves p sample_dist
             # these 2 pointers is used for calculation of probability
             p1_pointer = 0
             p2_pointer = p
             while (p2_pointer >= 0):
-                sum = p1_delay[p1_pointer] + p2_delay[p2_pointer]
-                if sum >= min_of_sum:
-                    idx = int(round((sum - min_of_sum) / self.sample_dist, self.decimal_place))#find the index of that value of SUM
-                    sum_pdf[idx] = p1_pdf[p1_pointer] * (p2_pdf[p2_pointer]*sample_dist) + sum_pdf[idx]
-                p2_pointer -= 1 # when this pointer go from p to 0, all overlapped parts are calculated
+                sum_pdf[p] = p1_pdf[p1_pointer] * p2_pdf[p2_pointer] + sum_pdf[p]
+                p2_pointer -= 1  # when this pointer go from p to 0, all overlapped parts are calculated
                 p1_pointer += 1
 
-        #Return the result as PDF Obj
-        R1 = PDF(sample_dist = self.sample_dist, delay = sum_delay, pdf = sum_pdf, decimal_place= self.decimal_place)
+        # Return the result as PDF Obj
+        R1 = PDF(sample_dist=self.sample_dist, delay=sum_delay, pdf=sum_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
+        #R1.pdf = R1.pdf / np.sum(R1.pdf)
         return R1
     
     def __add__(self,PDF2): ###'+' operator overloading
         return self.SUM(PDF2)
     
     def MAX(self, PDF2):
-        #Step1: find important parameters first
+        # Step1: find important parameters first
+        # print(self.delay)
         p1_min = round(self.delay.min(), self.decimal_place)
         p1_max = round(self.delay.max(), self.decimal_place)
         p2_min = round(PDF2.delay.min(), self.decimal_place)
         p2_max = round(PDF2.delay.max(), self.decimal_place)
 
-        #Prevent access to nonexistent value
-        p1_delay = np.concatenate((self.delay, np.zeros(len(PDF2.pdf))))
-        p1_pdf = np.concatenate((self.pdf, np.zeros(len(PDF2.pdf))))
-        p2_delay = np.concatenate((PDF2.delay, np.zeros(len(self.pdf))))
-        p2_pdf = np.concatenate((PDF2.pdf, np.zeros(len(self.pdf))))
+        # Prevent access to nonexistent value
+        p1_delay = self.delay
+        p1_pdf = self.pdf
+        p2_delay = PDF2.delay
+        p2_pdf = PDF2.pdf
 
-        #Step2: create numpy.array of the MAX result by defining the boundary of its possible values
+        # print(p1_delay)
+        # print(p1_pdf)
+        # print(p2_delay)
+        # print(p2_pdf)
+
+        # Step2: create numpy.array of the MAX result by defining the boundary of its possible values
         min_of_max = round(max(p1_min, p2_min), self.decimal_place)
         max_of_max = round(max(p1_max, p2_max), self.decimal_place)
-        size = int(round((max_of_max-min_of_max), self.decimal_place) / sample_dist) +2
-        #Initializing the numpy array
+        size = int(round((max_of_max - min_of_max), self.decimal_place) / sample_dist) + 1
+        # Initializing the numpy array
         max_delay = np.around(np.linspace(min_of_max, max_of_max, size, endpoint=True), decimals=self.decimal_place)
         max_pdf = np.zeros(size)
 
-        #See every possible value in MAX output
+        p1_pointer = 0
+        p2_pointer = 0
+
+        # See every possible value in MAX output
         for p in range(size):
-            #Check PDF2 first, so that we just have to ensure that the value exist in p1, otherwwise it is 0.
+            # print(str(max_delay[p])+' ###############################' )
+            # Check PDF2 first, so that we just have to ensure that the value exist in p1, otherwwise it is 0.
             if max_delay[p] <= p1_max:
-                idx1 = int(round((max_delay[p] - p1_min)/sample_dist, self.decimal_place))
+                while max_delay[p] > p1_delay[p1_pointer]:
+                    p1_pointer += 1
+                    if p1_delay[p1_pointer] == p1_max:
+                        break
+
+                # print(p1_pointer)
                 # find indices of all values in p1 that its value is smaller than max value
-                idx2_list = np.where((p2_delay <= max_delay[p]))[0]   #include the same value
-                sum = 0
+                idx2_list = np.where((p2_delay <= max_delay[p]))[0]  # include the same value
+                # print(p2_delay[idx2_list])
                 for idx in idx2_list:
-                    sum = sum + (p2_pdf[idx]*sample_dist)
-                max_pdf[p] = max_pdf[p] + p1_pdf[idx1] * sum
-            # Check PDF1, we just have to ensure that the value exist in p1, otherwwise it is 0.
+                    max_pdf[p] = max_pdf[p] + p2_pdf[idx] * p1_pdf[p1_pointer]
+            # Check PDF1, we just have to ensure that the value exist in p1, otherwise it is 0.
             if max_delay[p] <= p2_max:
-                idx2 = int(round((max_delay[p] - p2_min), self.decimal_place) / sample_dist)
-                #find indices of all values in p1 that its value is smaller than max value
-                idx1_list = np.where((p1_delay < max_delay[p]))[0]    #exclude the same value
-                sum = 0
+                while max_delay[p] > p2_delay[p2_pointer]:
+                    p2_pointer += 1
+                    if p2_delay[p2_pointer] == p2_max:
+                        break
+                # print(p2_pointer)
+                # find indices of all values in p1 that its value is smaller than max value
+                idx1_list = np.where((p1_delay < max_delay[p]))[0]  # exclude the same value
+                # print(p1_delay[idx1_list])
                 for idx in idx1_list:
-                    sum = sum + (p1_pdf[idx]*sample_dist)
-                max_pdf[p] = max_pdf[p] + p2_pdf[idx2] * sum
+                    max_pdf[p] = max_pdf[p] + p1_pdf[idx] * p2_pdf[p2_pointer]
+            # print('###############################')
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
         return R1

@@ -21,7 +21,7 @@ Ex:
 python3 main.py ./tech10nm.sstalib ./circuit/c17.ckt658
 ```
 ## SSTA System Diagram
-![Diagram](/images/System_overview.PNG)
+![Diagram](/images/System_Diagram.png)
 <p align="right">by ZhiYu</p>
 
 ## PDF(Probability Density Function) Sampling Diagram
