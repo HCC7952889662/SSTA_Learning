@@ -2,3 +2,6 @@
 .DS_Store
 .DS_Store
 .DS_Store
+.idea/workspace.xml
+__pycache__/PDF.cpython-37.pyc
+output_delay_dist.pdf
