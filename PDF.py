@@ -31,7 +31,7 @@ class PDF:
         x = np.arange(mu - k, mu + k, sample_dist)
         x = np.around(x, decimals=self.decimal_place)
         px = norm.pdf(x, loc=mu, scale=sigma)
-        px = px / sum(px)
+        # px = px / sum(px)
         return x, px
 
     def decimal_place_generator(self):
@@ -74,7 +74,7 @@ class PDF:
                 sum = p1_delay[p1_pointer] + p2_delay[p2_pointer]
                 if sum >= min_of_sum:
                     idx = int(round((sum - min_of_sum) / self.sample_dist, self.decimal_place))#find the index of that value of SUM
-                    sum_pdf[idx] = p1_pdf[p1_pointer] * p2_pdf[p2_pointer] + sum_pdf[idx]
+                    sum_pdf[idx] = p1_pdf[p1_pointer] * (p2_pdf[p2_pointer]*sample_dist) + sum_pdf[idx]
                 p2_pointer -= 1 # when this pointer go from p to 0, all overlapped parts are calculated
                 p1_pointer += 1
 
@@ -116,7 +116,7 @@ class PDF:
                 idx2_list = np.where((p2_delay <= max_delay[p]))[0]   #include the same value
                 sum = 0
                 for idx in idx2_list:
-                    sum = sum + p2_pdf[idx]
+                    sum = sum + (p2_pdf[idx]*sample_dist)
                 max_pdf[p] = max_pdf[p] + p1_pdf[idx1] * sum
             # Check PDF1, we just have to ensure that the value exist in p1, otherwwise it is 0.
             if max_delay[p] <= p2_max:
@@ -125,7 +125,7 @@ class PDF:
                 idx1_list = np.where((p1_delay < max_delay[p]))[0]    #exclude the same value
                 sum = 0
                 for idx in idx1_list:
-                    sum = sum + p1_pdf[idx]
+                    sum = sum + (p1_pdf[idx]*sample_dist)
                 max_pdf[p] = max_pdf[p] + p2_pdf[idx2] * sum
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
@@ -136,7 +136,7 @@ class PDF:
             if p < P_tolerance:
                 self.delay = np.delete(self.delay, np.where(self.pdf == p))
                 self.pdf = np.delete(self.pdf, np.where(self.pdf == p))
-        self.pdf = self.pdf / np.sum(self.pdf)
+        # self.pdf = self.pdf / np.sum(self.pdf)
 
     def plot(self, color='tan'):
         plt.figure()
