@@ -158,6 +158,9 @@ class PDF:
             if p < P_tolerance:
                 self.delay = np.delete(self.delay, np.where(self.pdf == p))
                 self.pdf = np.delete(self.pdf, np.where(self.pdf == p))
+            if np.sum(self.pdf) >= 5:
+                self.pdf = self.pdf / np.sum(self.pdf)
+            #print(np.sum(self.pdf))
         # self.pdf = self.pdf / np.sum(self.pdf)
 
     def plot(self, color='tan'):
