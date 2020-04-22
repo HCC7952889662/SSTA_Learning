@@ -154,7 +154,7 @@ class PDF:
         # See every possible value in MAX output
         for p in range(size):
             # print(str(max_delay[p])+' ###############################' )
-            # Check PDF2 first, so that we just have to ensure that the value exist in p1, otherwwise it is 0.
+            # Check PDF2 first, so that we just have to ensure that the value exist in p1, otherwise it is 0.
             if max_delay[p] <= p1_max:
                 while max_delay[p] > p1_delay[p1_pointer]:
                     p1_pointer += 1
