@@ -81,10 +81,24 @@ class PDF:
 
         p1_delay = np.concatenate((self.delay, np.zeros(len(PDF2.pdf))))
         p1_pdf = np.concatenate((self.pdf, np.zeros(len(PDF2.pdf))))
+        
+        # print("starting sum")
+        area = 0
+        for i in range(len(p1_pdf)):
+            area = area + p1_pdf[i]*self.sample_dist
+        # print("area of p1", area)
+        p1_pdf = p1_pdf / area
         p1_pdf = p1_pdf * sample_dist
 
         p2_delay = np.concatenate((PDF2.delay, np.zeros(len(self.pdf))))
         p2_pdf = np.concatenate((PDF2.pdf, np.zeros(len(self.pdf))))
+        
+        area = 0
+        for i in range(len(p2_pdf)):
+            area = area + p2_pdf[i]*self.sample_dist
+        # print("area of p2", area)
+        p2_pdf = p2_pdf/area
+
         p2_pdf = p2_pdf * sample_dist
 
         #when p = 0, the head of the second input is alighed with the tail of the first input
@@ -93,10 +107,10 @@ class PDF:
             p1_pointer = 0
             p2_pointer = p
             while (p2_pointer >= 0):
-                sum = p1_delay[p1_pointer] + p2_delay[p2_pointer]
+                sum_of_delays = p1_delay[p1_pointer] + p2_delay[p2_pointer]
                 # sum = range_delay[p1_pointer] + range_delay[p2_pointer]
-                if sum >= min_of_sum:
-                    idx = int(round((sum - min_of_sum) / self.sample_dist, self.decimal_place))#find the index of that value of SUM
+                if sum_of_delays >= min_of_sum:
+                    idx = int(round((sum_of_delays - min_of_sum) / self.sample_dist, self.decimal_place))#find the index of that value of SUM
                     pdf_1 = (p1_pdf[p1_pointer])#*sample_dist)
                     pdf_2 = (p2_pdf[p2_pointer])#*sample_dist)
                     sum_pdf[idx] = (pdf_1*pdf_2) + sum_pdf[idx]
@@ -104,11 +118,12 @@ class PDF:
                 p1_pointer += 1
         
         #finding area under curve after sum.
-        area = 0
-        for i in range(len(sum_pdf)):
-            area = area + sum_pdf[i]#*self.sample_dist
-        print(area)
         sum_pdf = sum_pdf / sample_dist
+        # area = 0
+        # for i in range(len(sum_pdf)):
+        #     area = area + sum_pdf[i]*self.sample_dist
+        # print("area of p1 + p2 ",area)
+        
         #Return the result as PDF Obj
         
         R1 = PDF(sample_dist = self.sample_dist, delay = sum_delay, pdf = sum_pdf, decimal_place= self.decimal_place)
@@ -134,7 +149,15 @@ class PDF:
         p1_pdf = self.pdf
         p2_delay = PDF2.delay
         p2_pdf = PDF2.pdf
-
+        # print("starting max")
+        # area = 0
+        # for i in range(len(p1_pdf)):
+        #     area = area + p1_pdf[i]*self.sample_dist
+        # print("area of p1", area)
+        # area = 0
+        # for i in range(len(p2_pdf)):
+        #     area = area + p2_pdf[i]*self.sample_dist
+        # print("area of p2", area)
         # print(p1_delay)
         # print(p1_pdf)
         # print(p2_delay)
@@ -180,10 +203,12 @@ class PDF:
                 for idx in idx1_list:
                     max_pdf[p] = max_pdf[p] + p1_pdf[idx] * p2_pdf[p2_pointer] * sample_dist
             # print('###############################')
-        area = 0
-        for i in range(len(max_pdf)):
-            area = area + max_pdf[i]*self.sample_dist
-        print(area)
+            
+        # area = 0
+        # for i in range(len(max_pdf)):
+        #     area = area + max_pdf[i]*self.sample_dist
+        # print("area of max of p1, p2 ",area)
+        # max_pdf = max_pdf / area
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
         return R1
