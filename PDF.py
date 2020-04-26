@@ -32,7 +32,7 @@ class PDF:
         return x, p
 
     def n_pdf(self, x, mean, std):
-        p = (1 / (std * np.sqrt(2 * np.pi)) * np.exp(- (x - mean) ** 2 / (2 * std ** 2)))*self.sample_dist
+        p = (1 / (std * np.sqrt(2 * np.pi)) * np.exp(- (x - mean) ** 2 / (2 * std ** 2)))#*self.sample_dist
         return p
 
     def decimal_place_generator(self):
@@ -67,9 +67,20 @@ class PDF:
         # Step2: concatenate 0s into 2 Inputs to make them size equal to (size1+size2)
         p1_delay = np.concatenate((self.delay, np.zeros(len(PDF2.pdf))))
         p1_pdf = np.concatenate((self.pdf, np.zeros(len(PDF2.pdf))))
+        area = 0
+        for i in range(len(p1_pdf)):
+            area = area + p1_pdf[i]*self.sample_dist
+        p1_pdf = p1_pdf / area
+        p1_pdf = p1_pdf * sample_dist       ###PDF to PMF conversion
+        
         p2_delay = np.concatenate((PDF2.delay, np.zeros(len(self.pdf))))
         p2_pdf = np.concatenate((PDF2.pdf, np.zeros(len(self.pdf))))
-
+        area = 0
+        for i in range(len(p2_pdf)):
+            area = area + p2_pdf[i]*self.sample_dist
+        p2_pdf = p2_pdf / area
+        p2_pdf = p2_pdf * sample_dist       ###PDF to PMF conversion
+        
         # Step3: do pointers moving
         # when p = 0, the head of the second input is alighed with the tail of the first input
         for p in range(len(sum_delay)):  # the second input moves p sample_dist
@@ -80,7 +91,7 @@ class PDF:
                 sum_pdf[p] = p1_pdf[p1_pointer] * p2_pdf[p2_pointer] + sum_pdf[p]
                 p2_pointer -= 1  # when this pointer go from p to 0, all overlapped parts are calculated
                 p1_pointer += 1
-
+        sum_pdf = sum_pdf / sample_dist         ###PMF to PDF conversion
         # Return the result as PDF Obj
         R1 = PDF(sample_dist=self.sample_dist, delay=sum_delay, pdf=sum_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
@@ -135,7 +146,7 @@ class PDF:
                 idx2_list = np.where((p2_delay <= max_delay[p]))[0]  # include the same value
                 # print(p2_delay[idx2_list])
                 for idx in idx2_list:
-                    max_pdf[p] = max_pdf[p] + p2_pdf[idx] * p1_pdf[p1_pointer]
+                    max_pdf[p] = max_pdf[p] + p2_pdf[idx] * p1_pdf[p1_pointer] * sample_dist
             # Check PDF1, we just have to ensure that the value exist in p1, otherwise it is 0.
             if max_delay[p] <= p2_max:
                 while max_delay[p] > p2_delay[p2_pointer]:
@@ -147,7 +158,7 @@ class PDF:
                 idx1_list = np.where((p1_delay < max_delay[p]))[0]  # exclude the same value
                 # print(p1_delay[idx1_list])
                 for idx in idx1_list:
-                    max_pdf[p] = max_pdf[p] + p1_pdf[idx] * p2_pdf[p2_pointer]
+                    max_pdf[p] = max_pdf[p] + p1_pdf[idx] * p2_pdf[p2_pointer] * sample_dist
             # print('###############################')
         R1 = PDF(sample_dist=self.sample_dist, delay=max_delay, pdf=max_pdf, decimal_place=self.decimal_place)
         R1.data_shrink()
