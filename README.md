@@ -72,7 +72,7 @@ data_shrink(): This function delete delay data in PDF whose probability is small
 These 2 functions are designed for the experiment in PHASE I project, which is to see whether the results are different in these 2 functions.
 
 ## Sample Results for c432 circuit:
-![c6288](/images/c432.png)
+![c6288](/images/c432_re.png)
 
 ## Reference:
 [1]  J.-H. Liu, A.-S. Hong, L. Chen, and C. Chen, “Process-variation statisticalmodeling for vlsi timing analysis,” 04 2008, pp. 730 – 733.
