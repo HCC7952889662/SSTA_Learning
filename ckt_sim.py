@@ -1,8 +1,10 @@
-from PDF_exp_version import *
+from PDF import *
 import math
 import seaborn as sns
 from cread import cread
 from lev import lev
+import scipy.stats
+import itertools
 
 # Library Read Function : return a Dict
 def read_sstalib(filename):
@@ -108,6 +110,7 @@ def ckt_update(nodelist_test):
                         max_of_inputs = (max_of_inputs).MAX(i.unodes[k+1].total_dist)      ##finding max of two inputs at a time
                         
                 i.total_dist = (i.gate_dist)+(max_of_inputs) ##Adding Max_of_inputs with gate_distribution
+        
         print('{}\t{}\t{}\t'.format(i.gtype, i.lev, i.num),"completed")
         #if(i.num==int(sys.argv[1])):
         #    plt.figure()
@@ -117,6 +120,117 @@ def ckt_update(nodelist_test):
         #    sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='teal')
         #    plt.show()
         #    return
+
+## reconvergent algorithm top function
+def reconvergent_top(nodelist_test):
+    for i in nodelist_test:
+        if(len(i.unodes)>1):    ##correlation occurs for multi-input gates
+            DLi,DLo = gen_dep_list(i)       ###it generates the dependency lists for every input of 'i' node.
+            depMax(i,DLi,DLo)       ##depMax algorithm for correction in i.total_dist
+
+# Finding Dependency list for the inputs.
+def gen_dep_list(i):
+    ##find input that become 1 well before any other input arrives. We need to check similarity between every pair of inputs.
+    dep_inputs = [] ##list of inputs that will contribute to output
+    all_combos = list(itertools.combinations(i.unodes,2))   ##it generates the list of tuples, each of size 2 using nC2 for checking similarity between every pair of inputs of 'i' nodes
+    for node in all_combos:
+        print("node no. ",i.num," input combos are ",node[0].num,node[1].num)
+        mu1=np.mean(node[0].total_dist.delay)
+        mu2=np.mean(node[1].total_dist.delay)
+        std1=np.std(node[0].total_dist.delay)
+        std2=np.std(node[1].total_dist.delay)
+        l1=len(node[0].total_dist.delay)
+        l2=len(node[1].total_dist.delay)
+        t= abs((mu1-mu2)/np.sqrt((std1**2/l1)+(std2**2/l2)))    ##if t-value is close to 0 then it means both inputs are arriving close to each other. So we have to consider them.
+        if(t<=10):
+            if node[0] not in dep_inputs:
+                dep_inputs.append(node[0])
+            if node[1] not in dep_inputs:
+                dep_inputs.append(node[1])
+    
+    ##finding the dependency lists for every input in dep_inputs
+    DLi = {}
+    for j in dep_inputs:
+        temp_list = []
+        temp_list.append(j)     ### is it needed?
+        dep_list(j,temp_list)
+        DLi[j]=temp_list
+    
+    DLo = []
+    if(i.fout>1):
+        DLo.append(i)
+    for j in dep_inputs:
+        for v in DLi[j]:
+            if v not in DLo:
+                DLo.append(v)
+    DLo.sort(key=lambda x: x.lev,reverse=True)      ##sort nodes in DLo in the decreasing order of levels
+    # for x in DLo:
+    #     print(x.num)
+    return DLi,DLo
+
+def dep_list(j,temp_list):  ## recursive function to find all the nodes on which input of 'i' node depends
+    if(j.gtype=='IPT'):     ##find till IPT nodes.
+        if j not in temp_list:
+            temp_list.append(j)
+        return
+    else:
+        for i in j.unodes:
+            if i not in temp_list:
+                temp_list.append(i)
+            dep_list(i,temp_list)
+
+##Algorithm depMax
+def depMax(i,DLi,DLo):
+    Ao = None       ###arrival time at the output of 'i' node
+    L = []      ##list of all nodes 'v' that are connected to multiple inputs of 'i' node 
+    mapping = {}        ##holds the mapping of 'v' to inputs nodes to which it is connected
+    for v in DLo:   ##only those v's that are connected to more than 1 inputs are of interest.
+        tmp_list = []
+        for i_node in list(DLi.keys()):
+            for j in DLi[i_node]:
+                if(v.num==j.num):
+                    tmp_list.append(i_node)
+        if(len(tmp_list)>1):
+            mapping[v]=tmp_list
+            L.append(v)
+
+    # for x in list(mapping.keys()):
+    #     print("key is ",x.num)
+    #     for y in mapping[x]:
+    #         print("value ",y.num)
+    if(len(L)==0):      ##if L for 'i'th node is empty there is no correlation between its inputs.
+        return
+    else:
+        plt.figure()
+        for v in L:
+            print("reconvergent node is ",v.num)
+            sub_dist = SUB(v,0,mapping)     ### A0-Av
+            Aov = sub_dist #+ i.gate_dist        #Aov = A0 - Av
+            
+            for idx in range(1,len(mapping[v])):
+                tmp_Aov = SUB(v,idx,mapping) #+ i.gate_dist     ## Ai-Av
+                Aov = Aov.MAX(tmp_Aov) # find max among all Ai-Av
+            
+            if(Ao == None): ##if Ao is initiated for the first time
+                Ao = Aov
+            else:
+                Ao = Ao.MAX(Aov+v.total_dist)       ###Aov+v.total_dist is done based on equation12 on page 611
+
+        Ao = Ao + i.gate_dist   ##i.gate is added at end to improve run time.
+        plt.plot(i.total_dist.delay,i.total_dist.pdf,'--')
+        i.total_dist = Ao       ##i.total_dist is updated.
+        plt.plot(i.total_dist.delay,i.total_dist.pdf)
+        plt.show()
+        
+def SUB(v,idx,mapping):         # sub_dist = Aidx - Av
+    mu_Ai = np.mean(mapping[v][idx].total_dist.delay)
+    std_Ai = np.std(mapping[v][idx].total_dist.delay)
+    mu_Av = np.mean(v.total_dist.delay)
+    std_Av = np.std(v.total_dist.delay)
+    mu_sub = mu_Ai - mu_Av      
+    std_sub = np.sqrt(std_Ai**2 - std_Av**2)
+    sub_dist = PDF(sample_dist,mu=mu_sub,sigma=std_sub)     ###Aidx-Av
+    return sub_dist
 
 def plot_outputs(nodelist_test):
     total_plots=0
@@ -141,7 +255,7 @@ def plot_outputs(nodelist_test):
             #plt.title("plot for node %i"%(i.num))
             plt.xlabel('Delay(ns)')
             plt.ylabel('Probability')
-            sns.lineplot(i.total_dist.delay, i.total_dist.pdf, color='teal')
+            sns.scatterplot(i.total_dist.delay, i.total_dist.pdf, color='teal')
             c = c+1
             if(c==4):
                 r = r+1
@@ -175,5 +289,3 @@ def plot_outputs(nodelist_test):
 
 #except IOError:
     #print("error in the code")
-
-
