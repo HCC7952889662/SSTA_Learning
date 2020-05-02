@@ -51,6 +51,9 @@ print('STA analysis ... ', end = '')
 find_mean(sstalib, nodelist_test)
 print('completed')
 
+##Reconvergent Algorithm
+reconvergent_top(nodelist_test)
+
 
 # Output Plot
 plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
