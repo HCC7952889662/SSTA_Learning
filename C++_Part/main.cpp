@@ -2,7 +2,7 @@
 //  main.cpp
 //  VerilogtoBench
 //
-//  Created by Alex Cheng on 2020/5/3.
+//  Created by 鄭旭程 on 2020/5/3.
 //  Copyright © 2020 H.C C. All rights reserved.
 //
 
@@ -11,7 +11,7 @@
 #include <regex>
 #include <vector>
 #include <list>
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -29,9 +29,7 @@ struct node{
 class Circuit{
 private:
     string name;
-    map<string, node> Nodelist;
-    vector <node> nodelist;
-    vector <string> node_name_list;
+    unordered_map<string, node> Nodelist;
     vector <node> I_list;
     vector <node> O_list;
 public:
@@ -41,6 +39,7 @@ public:
     void VtoB();
     void Display_node();
     void Display_node_Detail();
+    void Display_node_name_list();
     /* Constructor */
     Circuit();
     /* Destructor */
@@ -52,45 +51,33 @@ public:
 void Circuit::SetName(string circuit_name){
     name = circuit_name;
 }
-void Circuit::ADD_Node(node n, string type){
-    if (type == "IPT"){
-        I_list.push_back(n);
-        nodelist.push_back(n);
-        node_name_list.push_back(n.node_name);
-    }
-    else if (type == "OUT"){
-        O_list.push_back(n);
-        nodelist.push_back(n);
-        node_name_list.push_back(n.node_name);
-    }
-    else{
-        nodelist.push_back(n);
-        node_name_list.push_back(n.node_name);
-    }
-}
+
 /*Constructor & Destructor*/
 Circuit::Circuit(){};
 Circuit::~Circuit(){};
 
 void Circuit::Display_node(){
     cout << name << endl;
-    for (int i = 0; i < nodelist.size(); i++){
-        cout << nodelist[i].node_name << " ";
+    unordered_map<string, node>:: iterator itr;
+    for (itr = Nodelist.begin(); itr != Nodelist.end(); itr++){
+        cout << itr->second.node_name << " Type: " <<  itr->second.type << endl;
     }
     cout << endl;
 }
+
 void Circuit::Display_node_Detail(){
     cout << name << endl;
-    for (int i = 0; i < nodelist.size(); i++){
-        cout << nodelist[i].node_name << " Type: " << nodelist[i].type << endl;
+    unordered_map<string, node>:: iterator itr;
+    for (itr = Nodelist.begin(); itr != Nodelist.end(); itr++){
+        cout << itr->first << " Type: " <<  itr->second.type << endl;
         cout << "fan_in : ";
-        for (int j = 0; j < nodelist[i].fan_in_node.size(); j++){
-            cout << nodelist[i].fan_in_node[j] << " ";
+        for (int j = 0; j < itr->second.fan_in_node.size(); j++){
+            cout << itr->second.fan_in_node[j] << " ";
         }
         cout << endl;
         cout << "fan_out : ";
-        for (int j = 0; j < nodelist[i].fan_out_node.size(); j++){
-            cout << nodelist[i].fan_out_node[j] << " ";
+        for (int j = 0; j < itr->second.fan_out_node.size(); j++){
+            cout << itr->second.fan_out_node[j] << " ";
         }
         cout << endl;
     }
@@ -107,13 +94,16 @@ void Circuit::VtoB(){
         fout << "OUTPUT(" << O_list[i].node_name << ")" << endl;
     }
     fout << endl << endl;
-    for (int i = I_list.size()+ O_list.size(); i < nodelist.size(); i++){
-        fout << nodelist[i].node_name << " = " << nodelist[i].type << "(";
-        for (int j = 0; j < nodelist[i].fan_in_node.size(); j++){
-            if (j != nodelist[i].fan_in_node.size()-1)
-                fout << nodelist[i].fan_in_node[j] << ", ";
-            else
-                fout << nodelist[i].fan_in_node[j] << ")" << endl;
+    unordered_map<string, node>:: iterator itr;
+    for (itr = Nodelist.begin(); itr != Nodelist.end(); itr++){
+        if (!itr->second.fan_in_node.empty()){
+            fout << itr->first << " = " << itr->second.type << "(";
+            for (int j = 0; j < itr->second.fan_in_node.size(); j++){
+                if (j != itr->second.fan_in_node.size()-1)
+                    fout << itr->second.fan_in_node[j] << ", ";
+                else
+                    fout << itr->second.fan_in_node[j] << ")" << endl;
+            }
         }
     }
     fout.close();
@@ -126,7 +116,7 @@ public:
     /* Destructor */
     ~Circuit_manager();
     list <Circuit> circuit_list;
-    map <string,string> circuit_info;
+    unordered_map <string,string> circuit_info;
     
     //To be finished
 };
@@ -136,6 +126,7 @@ void Input_File(string file_name, Circuit &C) {
     ifstream fin(file_name);
     string s = "";
     string eff_s = "";
+    vector <string> out_name;
     if (fin.good()){
         while(getline(fin, s)){
             smatch m;
@@ -175,7 +166,7 @@ void Input_File(string file_name, Circuit &C) {
                     regex reg("[ ]*reg (.*);");
                     
                     if (regex_match(eff_s, m, input)){
-                        //cout << m[1] << endl;
+                        cout << m[1] << endl;
                         stringstream s_stream(m[1]);
                         while(s_stream.good()) {
                             string substr;
@@ -186,53 +177,63 @@ void Input_File(string file_name, Circuit &C) {
                             ipt.type = "IPT";
                             C.I_list.push_back(ipt);
                             C.Nodelist[ipt.node_name] = ipt;
-                            C.node_name_list.push_back(ipt.node_name);
                         }
                         
                     }
                     else if (regex_match(eff_s, m, output)){
-                        //cout << m[1] << endl;
+                        cout << m[1] << endl;
                         stringstream s_stream(m[1]);
                         while(s_stream.good()) {
                             string substr;
                             getline(s_stream, substr, ','); //get first string delimited by comma
                             substr.erase(std::remove(substr.begin(), substr.end(), ' '), substr.end());
-                            node out;
-                            out.node_name = substr;
-                            out.type = "OUT";
-                            C.O_list.push_back(out);
-                            C.Nodelist[out.node_name] = out;
-                            C.node_name_list.push_back(out.node_name);
-                            
+                            out_name.push_back(substr);
                         }
                     }
                     else if (regex_match(eff_s, m, gate)){
                         if (m[1] == "module"){
-                            //cout << m[2] << endl;
+                            cout << m[2] << endl;
                             string name = m[2];
                             name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
                             C.name = name;
                         }
                         else{
+                            string out_node;
                             node g;
                             int o = 0;
-                            //cout << m[3] << endl;
+                            cout << m[3] << endl;
                             stringstream s_stream(m[3]);
                             while(s_stream.good()) {
                                 string substr;
                                 getline(s_stream, substr, ','); //get first string delimited by comma
                                 substr.erase(std::remove(substr.begin(), substr.end(), ' '), substr.end());
+                                g.node_name = substr;
+                                g.type = m[1];
                                 //cout << substr << endl;
                                 if (o == 0){
-                                    g.node_name = substr;
-                                    g.type = m[1];
+                                    vector<string>::iterator it = std::find(out_name.begin(), out_name.end(), substr);
+                                    if(it != out_name.end()){
+                                        C.O_list.push_back(g);
+                                    }
+                                    out_node = g.node_name;
+                                    C.Nodelist[out_node]= g;
                                 }
                                 else{
-                                    g.fan_in_node.push_back(substr);
+                                    if (C.Nodelist.find(substr) != C.Nodelist.end()){
+                                        C.Nodelist[substr].fan_out_node.push_back(out_node);
+                                        C.Nodelist[out_node].fan_in_node.push_back(substr);
+                                    }
+                                    else{
+                                        node new_node;
+                                        new_node.node_name = substr;
+                                        new_node.fan_out_node.push_back(out_node);
+                                        C.Nodelist[out_node].fan_in_node.push_back(substr);
+                                        C.Nodelist[substr] = new_node;
+                                    }
+                                        
                                 }
                                 o++;
                             }
-                            C.Nodelist[g.node_name] = g;
                          }
                         
                     }
@@ -252,7 +253,7 @@ int main(int argc, const char * argv[]) {
     Circuit C;
     Input_File("c432.v",C);
     cout << endl;
-    //C.Display_node_Detail();
+    C.Display_node_Detail();
     C.VtoB();
     return 0;
 }
