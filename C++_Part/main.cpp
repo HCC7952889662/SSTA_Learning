@@ -2,7 +2,7 @@
 //  main.cpp
 //  VerilogtoBench
 //
-//  Created by 鄭旭程 on 2020/5/3.
+//  Created by Alex Cheng on 2020/5/3.
 //  Copyright © 2020 H.C C. All rights reserved.
 //
 
