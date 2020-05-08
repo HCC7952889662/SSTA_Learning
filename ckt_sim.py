@@ -84,10 +84,14 @@ def means_update(nodelist_test):
 def find_mean(sstalib, nodelist_test):
     set_means(sstalib, nodelist_test)
     means_update(nodelist_test)
-    #for i in nodelist_test:     
-    #   if(i.ntype=="PO"):
-    #      print("Mean value of node %i using STA method is %f"%(i.num,i.total_mean))
-    #return
+    for i in nodelist_test:     
+      if(i.ntype=="PO"):
+        i.total_mean = np.mean(i.total_dist.delay)
+        temp = np.std(i.total_dist.delay)
+        print("Mean value of node %i is %f"%(i.num,i.total_mean))
+        print("STD value of node %i is %f"%(i.num,temp))   
+        #  print("mean using formula ",i.total_mean)
+    return
 
 def set_nodes(sstalib, nodelist_test):
     for i in nodelist_test:
@@ -125,47 +129,27 @@ def ckt_update(nodelist_test):
 def reconvergent_top(nodelist_test):
     for i in nodelist_test:
         if(len(i.unodes)>1):    ##correlation occurs for multi-input gates
+            print("Performing Recorrection on node no.",i.num)
             DLi,DLo = gen_dep_list(i)       ###it generates the dependency lists for every input of 'i' node.
             depMax(i,DLi,DLo)       ##depMax algorithm for correction in i.total_dist
 
 # Finding Dependency list for the inputs.
 def gen_dep_list(i):
-    ##find input that become 1 well before any other input arrives. We need to check similarity between every pair of inputs.
-    dep_inputs = [] ##list of inputs that will contribute to output
-    all_combos = list(itertools.combinations(i.unodes,2))   ##it generates the list of tuples, each of size 2 using nC2 for checking similarity between every pair of inputs of 'i' nodes
-    for node in all_combos:
-        print("node no. ",i.num," input combos are ",node[0].num,node[1].num)
-        mu1=np.mean(node[0].total_dist.delay)
-        mu2=np.mean(node[1].total_dist.delay)
-        std1=np.std(node[0].total_dist.delay)
-        std2=np.std(node[1].total_dist.delay)
-        l1=len(node[0].total_dist.delay)
-        l2=len(node[1].total_dist.delay)
-        t= abs((mu1-mu2)/np.sqrt((std1**2/l1)+(std2**2/l2)))    ##if t-value is close to 0 then it means both inputs are arriving close to each other. So we have to consider them.
-        if(t<=10):
-            if node[0] not in dep_inputs:
-                dep_inputs.append(node[0])
-            if node[1] not in dep_inputs:
-                dep_inputs.append(node[1])
-    
-    ##finding the dependency lists for every input in dep_inputs
+    ##finding the dependency lists for every input of 'i'th node
     DLi = {}
-    for j in dep_inputs:
+    for j in list(i.unodes):
         temp_list = []
-        # temp_list.append(j)     ### is it needed?
         dep_list(j,temp_list)
         DLi[j]=temp_list
     
     DLo = []
     if(i.fout>1):
         DLo.append(i)
-    for j in dep_inputs:
+    for j in list(i.unodes):
         for v in DLi[j]:
             if v not in DLo:
                 DLo.append(v)
     DLo.sort(key=lambda x: x.lev,reverse=True)      ##sort nodes in DLo in the decreasing order of levels
-    # for x in DLo:
-    #     print(x.num)
     return DLi,DLo
 
 def dep_list(j,temp_list):  ## recursive function to find all the nodes on which input of 'i' node depends
@@ -194,52 +178,32 @@ def depMax(i,DLi,DLo):
             mapping[v]=tmp_list
             L.append(v)
 
-    # for x in list(mapping.keys()):
-    #     print("key is ",x.num)
-    #     for y in mapping[x]:
-    #         print("value ",y.num)
     if(len(L)==0):      ##if L for 'i'th node is empty there is no correlation between its inputs.
         return
     else:
-        # plt.figure()
         for n in range(0,len(L)):
             v = L[n]
             print("reconvergent node is ",v.num)
-            #sub_dist = SUB(v,0,mapping)     ### A0-Av
-            sub_dist = (mapping[v][0].total_dist).SUBT(v.total_dist)
+            print("related input node no. ",mapping[v][0].num)
+            sub_dist = (mapping[v][0].total_dist).SUBT(v.total_dist)    ### A0-Av
             Aov = sub_dist #+ i.gate_dist        #Aov = A0 - Av
-            
-            for idx in range(1,len(mapping[v])):
-                # tmp_Aov = SUB(v,idx,mapping) #+ i.gate_dist     ## Ai-Av
+
+            for idx in range(1,len(mapping[v])):    ##Find MAX of Ai-Av for all the inputs
+                print("related input node no. ",mapping[v][idx].num)
                 tmp_Aov = (mapping[v][idx].total_dist).SUBT(v.total_dist)
                 Aov = Aov.MAX(tmp_Aov) # find max among all Ai-Av
-            
-            if(Ao == None): ##if Ao is initiated for the first time
-                Ao = Aov#+v.total_dist
-                # break
-            else:
-                Ao = Ao.MAX(Aov)#+v.total_dist)       ###Aov+v.total_dist is done based on equation12 on page 611
-            if(n==6):
-                break
-        Ao = Ao + v.total_dist      ###Aov+v.total_dist is done based on equation12 on page 611
-        Ao = Ao + i.gate_dist   ##i.gate is added at end to improve run time.
-        # plt.title("plot for the node %i"%(i.num))
-        # plt.plot(i.total_dist.delay,i.total_dist.pdf,'--',label='no reconv. correction')
-        i.total_dist = Ao       ##i.total_dist is updated.
-        # plt.plot(i.total_dist.delay,i.total_dist.pdf,label='with reconv. correction')
-        # plt.legend()
-        # plt.show()
-   
-# def SUB(v,idx,mapping):         # sub_dist = Aidx - Av
-#     mu_Ai = np.mean(mapping[v][idx].total_dist.delay)
-#     std_Ai = np.std(mapping[v][idx].total_dist.delay)
-#     mu_Av = np.mean(v.total_dist.delay)
-#     std_Av = np.std(v.total_dist.delay)
-#     mu_sub = mu_Ai - mu_Av      
-#     std_sub = np.sqrt(std_Ai**2 - std_Av**2)
-#     sub_dist = PDF(sample_dist,mu=mu_sub,sigma=std_sub)     ###Aidx-Av
-#     return sub_dist
 
+            if(Ao == None): ##if Ao is initiated for the first time
+                Ao = Aov
+            else:
+                Ao = Ao.MAX(Aov)
+            if(n==0):   ## check till n+1 reconvergent nodes for the ith node.
+                break
+        Ao = Ao + v.total_dist      ###Aov+v.total_dist is done based on equation 12 on page 611
+
+        Ao = Ao + i.gate_dist   ##i.gate is added at end to improve run time.
+        i.total_dist = Ao       ##i.total_dist is updated.
+        
 def plot_outputs(nodelist_test):
     total_plots=0
     rows=0
@@ -258,7 +222,8 @@ def plot_outputs(nodelist_test):
     for i in nodelist_test:     ##plotting the distribution of output nodes.
         if(i.ntype=="PO"):
             plt.subplot2grid((rows,cols),(r,c))
-            plt.title("STA mu of node %i : %f"%(i.num,i.total_mean))
+            # plt.title("STA mu of node %i : %f"%(i.num,i.total_mean))
+            plt.title("mu of node %i without correction: %f"%(i.num,i.total_mean))
             plt.suptitle("plots for output nodes") # %i"%(i.num))
             #plt.title("plot for node %i"%(i.num))
             plt.xlabel('Delay(ns)')
