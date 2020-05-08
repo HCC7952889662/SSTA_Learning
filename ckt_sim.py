@@ -152,7 +152,7 @@ def gen_dep_list(i):
     DLi = {}
     for j in dep_inputs:
         temp_list = []
-        temp_list.append(j)     ### is it needed?
+        # temp_list.append(j)     ### is it needed?
         dep_list(j,temp_list)
         DLi[j]=temp_list
     
@@ -201,36 +201,44 @@ def depMax(i,DLi,DLo):
     if(len(L)==0):      ##if L for 'i'th node is empty there is no correlation between its inputs.
         return
     else:
-        plt.figure()
-        for v in L:
+        # plt.figure()
+        for n in range(0,len(L)):
+            v = L[n]
             print("reconvergent node is ",v.num)
-            sub_dist = SUB(v,0,mapping)     ### A0-Av
+            #sub_dist = SUB(v,0,mapping)     ### A0-Av
+            sub_dist = (mapping[v][0].total_dist).SUBT(v.total_dist)
             Aov = sub_dist #+ i.gate_dist        #Aov = A0 - Av
             
             for idx in range(1,len(mapping[v])):
-                tmp_Aov = SUB(v,idx,mapping) #+ i.gate_dist     ## Ai-Av
+                # tmp_Aov = SUB(v,idx,mapping) #+ i.gate_dist     ## Ai-Av
+                tmp_Aov = (mapping[v][idx].total_dist).SUBT(v.total_dist)
                 Aov = Aov.MAX(tmp_Aov) # find max among all Ai-Av
             
             if(Ao == None): ##if Ao is initiated for the first time
-                Ao = Aov
+                Ao = Aov#+v.total_dist
+                # break
             else:
-                Ao = Ao.MAX(Aov+v.total_dist)       ###Aov+v.total_dist is done based on equation12 on page 611
-
+                Ao = Ao.MAX(Aov)#+v.total_dist)       ###Aov+v.total_dist is done based on equation12 on page 611
+            if(n==6):
+                break
+        Ao = Ao + v.total_dist      ###Aov+v.total_dist is done based on equation12 on page 611
         Ao = Ao + i.gate_dist   ##i.gate is added at end to improve run time.
-        plt.plot(i.total_dist.delay,i.total_dist.pdf,'--')
+        # plt.title("plot for the node %i"%(i.num))
+        # plt.plot(i.total_dist.delay,i.total_dist.pdf,'--',label='no reconv. correction')
         i.total_dist = Ao       ##i.total_dist is updated.
-        plt.plot(i.total_dist.delay,i.total_dist.pdf)
-        plt.show()
-        
-def SUB(v,idx,mapping):         # sub_dist = Aidx - Av
-    mu_Ai = np.mean(mapping[v][idx].total_dist.delay)
-    std_Ai = np.std(mapping[v][idx].total_dist.delay)
-    mu_Av = np.mean(v.total_dist.delay)
-    std_Av = np.std(v.total_dist.delay)
-    mu_sub = mu_Ai - mu_Av      
-    std_sub = np.sqrt(std_Ai**2 - std_Av**2)
-    sub_dist = PDF(sample_dist,mu=mu_sub,sigma=std_sub)     ###Aidx-Av
-    return sub_dist
+        # plt.plot(i.total_dist.delay,i.total_dist.pdf,label='with reconv. correction')
+        # plt.legend()
+        # plt.show()
+   
+# def SUB(v,idx,mapping):         # sub_dist = Aidx - Av
+#     mu_Ai = np.mean(mapping[v][idx].total_dist.delay)
+#     std_Ai = np.std(mapping[v][idx].total_dist.delay)
+#     mu_Av = np.mean(v.total_dist.delay)
+#     std_Av = np.std(v.total_dist.delay)
+#     mu_sub = mu_Ai - mu_Av      
+#     std_sub = np.sqrt(std_Ai**2 - std_Av**2)
+#     sub_dist = PDF(sample_dist,mu=mu_sub,sigma=std_sub)     ###Aidx-Av
+#     return sub_dist
 
 def plot_outputs(nodelist_test):
     total_plots=0
@@ -289,3 +297,5 @@ def plot_outputs(nodelist_test):
 
 #except IOError:
     #print("error in the code")
+
+
