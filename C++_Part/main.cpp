@@ -47,6 +47,7 @@ public:
     ~Circuit();
     
     friend void Input_File(string, Circuit&);
+    friend class Circuit_manager;
     
 };
 void Circuit::SetName(string circuit_name){
@@ -119,7 +120,10 @@ public:
     list <Circuit> circuit_list;
     unordered_map <string,string> circuit_info;
     
-    //To be finished
+    //To be finished in the future
+    void levelization();
+    void ckt_sim();
+    void SSTA_sim();
 };
 
 
