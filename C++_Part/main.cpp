@@ -24,6 +24,7 @@ struct node{
     string type;
     vector <string> fan_in_node;
     vector <string> fan_out_node;
+    int value; // for simulation
 };
 
 class Circuit{
