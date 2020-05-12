@@ -1,4 +1,4 @@
-from PDF import *
+from PDF_v1 import *
 import math
 import seaborn as sns
 from cread import cread
@@ -104,11 +104,12 @@ def set_means_mc(sstalib, nodelist_test):#, variance):
                 i.gate_mean=random.choice(i.gate_dist.delay) #sstalib[i.gtype]['mu'] + sstalib[i.gtype]['sigma']*variance
 
 def monte_carlo(sstalib, nodelist_test):
+    k = 0
     output_record = {}
     for i in nodelist_test:     
         if(i.ntype=="PO"):
             output_record[i.num]=[]
-    for n in range(5000):
+    for n in range(10000):
         # print("iteration no. ",n)
         #variance = float(random.randrange(-300,300,1))/100      ###for variance till 3 sigma
         set_means_mc(sstalib, nodelist_test)#, variance)
@@ -120,7 +121,10 @@ def monte_carlo(sstalib, nodelist_test):
         total_mean = np.mean(output_record[i])
         total_std = np.std(output_record[i])
         print("Mean value of node %i is %f"%(i,total_mean))
-        print("STD value of node %i is %f"%(i,total_std)) 
+        print("STD value of node %i is %f"%(i,total_std))
+        k = i
+
+    MC_result_plot(output_record, k)
 
 def set_nodes(sstalib, nodelist_test):
     for i in nodelist_test:
@@ -271,7 +275,21 @@ def plot_outputs(nodelist_test):
     #         i.total_dist.plot()
     #         plt.title("plot for node %i"%(i.num))
     #         plt.show()
-   
+
+def MC_result_plot(output_record, k):
+    #print(output_record[k])
+    times = []
+    delay = []
+    for p in output_record[k]:
+        if round(p,2) not in delay:
+            delay.append(round(p,2))
+            times.append(1/5000)
+        else:
+            times[delay.index(round(p,2))]+=1/5000
+
+    sns.lineplot(delay, times, color = 'blue')
+    plt.show()
+
 #try:
     #start=timeit.default_timer()
 
