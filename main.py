@@ -50,16 +50,16 @@ elapsed_time = stop-start
 print("Simulation Time: ",elapsed_time," seconds")
 
 # STA analysis
-print('STA analysis ... ', end = '')
+#print('STA analysis ... ')
 find_mean(sstalib, nodelist_test)
 print('completed')
+
+# Output Plot
+plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
 
 # ###### Monte Carlo Analysis
 print("monte carlo analysis....")
 monte_carlo(sstalib, nodelist_test)
 print("complete")
 
-
-# Output Plot
-plot_outputs(nodelist_test)  ##plot the delay distribution for output nodes.
 print("simulation ends.")
