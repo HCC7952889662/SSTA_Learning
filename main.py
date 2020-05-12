@@ -41,6 +41,9 @@ ckt_update(nodelist_test) ## update the content of every node as we parse throug
 print('SSTA MAX & SUM Calculating ... completed')
 print('SSTA Analysis ...END')
 
+##Reconvergent Algorithm
+reconvergent_top(nodelist_test)
+
 # End Time Counting
 stop=timeit.default_timer()
 elapsed_time = stop-start
@@ -51,8 +54,10 @@ print('STA analysis ... ', end = '')
 find_mean(sstalib, nodelist_test)
 print('completed')
 
-##Reconvergent Algorithm
-reconvergent_top(nodelist_test)
+# ###### Monte Carlo Analysis
+print("monte carlo analysis....")
+monte_carlo(sstalib, nodelist_test)
+print("complete")
 
 
 # Output Plot
