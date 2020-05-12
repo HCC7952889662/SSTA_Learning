@@ -5,6 +5,7 @@ from cread import cread
 from lev import lev
 import scipy.stats
 import itertools
+import random
 
 # Library Read Function : return a Dict
 def read_sstalib(filename):
@@ -92,6 +93,34 @@ def find_mean(sstalib, nodelist_test):
         print("STD value of node %i is %f"%(i.num,temp))   
         #  print("mean using formula ",i.total_mean)
     return
+
+###Set mean values for monte carlo
+def set_means_mc(sstalib, nodelist_test)#, variance):
+    for i in nodelist_test:
+        if(i.gtype!='BRCH'):
+            if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
+                i.total_mean=random.choice(i.total_dist.delay)       #sstalib['IPT']['mu'] + sstalib['IPT']['sigma']*variance  
+            else:   ## All other gtype are gates (except BRCH)
+                i.gate_mean=random.choice(i.gate_dist.delay) #sstalib[i.gtype]['mu'] + sstalib[i.gtype]['sigma']*variance
+
+def monte_carlo(sstalib, nodelist_test):
+    output_record = {}
+    for i in nodelist_test:     
+        if(i.ntype=="PO"):
+            output_record[i.num]=[]
+    for n in range(5000):
+        # print("iteration no. ",n)
+        #variance = float(random.randrange(-300,300,1))/100      ###for variance till 3 sigma
+        set_means_mc(sstalib, nodelist_test)#, variance)
+        means_update(nodelist_test)
+        for i in nodelist_test:     
+            if(i.ntype=="PO"):
+                output_record[i.num].append(i.total_mean)
+    for i in list(output_record.keys()):     
+        total_mean = np.mean(output_record[i])
+        total_std = np.std(output_record[i])
+        print("Mean value of node %i is %f"%(i,total_mean))
+        print("STD value of node %i is %f"%(i,total_std)) 
 
 def set_nodes(sstalib, nodelist_test):
     for i in nodelist_test:
@@ -262,5 +291,3 @@ def plot_outputs(nodelist_test):
 
 #except IOError:
     #print("error in the code")
-
-
