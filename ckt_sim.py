@@ -95,7 +95,7 @@ def find_mean(sstalib, nodelist_test):
     return
 
 ###Set mean values for monte carlo
-def set_means_mc(sstalib, nodelist_test)#, variance):
+def set_means_mc(sstalib, nodelist_test):#, variance):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
             if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
