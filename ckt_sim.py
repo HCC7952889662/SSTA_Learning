@@ -284,10 +284,11 @@ def MC_result_plot(output_record, k):
     for p in output_record[k]:
         if round(p,2) not in delay:
             delay.append(round(p,2))
-            times.append(1/50)
+            times.append(1/10000)
         else:
-            times[delay.index(round(p,2))]+=1/50
-
+            times[delay.index(round(p,2))]+=1/10000
+    for i in range(len(times)):
+        times[i] = times[i]/sample_dist
     sns.lineplot(delay, times, color = 'blue')
     plt.show()
 
