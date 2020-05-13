@@ -99,9 +99,10 @@ def set_means_mc(sstalib, nodelist_test):#, variance):
     for i in nodelist_test:
         if(i.gtype!='BRCH'):
             if(i.gtype=='IPT'):     ##initiating total_dist of nodes of type "IPT" 
-                i.total_mean=random.choice(i.total_dist.delay)       #sstalib['IPT']['mu'] + sstalib['IPT']['sigma']*variance  
+                i.total_mean=random.choices(population = i.total_dist.delay, weights = i.total_dist.pdf/sample_dist, k =1)[0]       #sstalib['IPT']['mu'] + sstalib['IPT']['sigma']*variance
             else:   ## All other gtype are gates (except BRCH)
-                i.gate_mean=random.choice(i.gate_dist.delay) #sstalib[i.gtype]['mu'] + sstalib[i.gtype]['sigma']*variance
+                i.gate_mean=random.choices(population = i.gate_dist.delay, weights = i.gate_dist.pdf/sample_dist, k =1)[0] #sstalib[i.gtype]['mu'] + sstalib[i.gtype]['sigma']*variance
+
 
 def monte_carlo(sstalib, nodelist_test):
     k = 0
@@ -269,7 +270,7 @@ def plot_outputs(nodelist_test):
     # plt.tight_layout()
     plt.subplots_adjust(wspace=0.5,hspace=0.7)
     plt.savefig('output_delay_dist.pdf')
-    plt.show()
+    #plt.show()
     # for i in nodelist_test:     ##plotting the distribution of output nodes.
     #     if(i.num==16):
     #         i.total_dist.plot()
@@ -283,9 +284,9 @@ def MC_result_plot(output_record, k):
     for p in output_record[k]:
         if round(p,2) not in delay:
             delay.append(round(p,2))
-            times.append(1/5000)
+            times.append(1/50)
         else:
-            times[delay.index(round(p,2))]+=1/5000
+            times[delay.index(round(p,2))]+=1/50
 
     sns.lineplot(delay, times, color = 'blue')
     plt.show()
