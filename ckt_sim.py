@@ -1,4 +1,4 @@
-from PDF_v1 import *
+from PDF import *
 import math
 import seaborn as sns
 from cread import cread
@@ -124,8 +124,8 @@ def monte_carlo(sstalib, nodelist_test):
         # print("Mean value of node %i is %f"%(i,total_mean))
         # print("STD value of node %i is %f"%(i,total_std))
         k = i
-        if(k==23):
-            MC_result_plot(output_record, k)
+        # if(k==23):
+        MC_result_plot(output_record, k)
 
 def set_nodes(sstalib, nodelist_test):
     for i in nodelist_test:
@@ -289,9 +289,11 @@ def MC_result_plot(output_record, k):
             times[delay.index(round(p,2))]+=1/10000
     for i in range(len(times)):
         times[i] = times[i]/sample_dist
-    print(np.mean(delay),np.std(delay))
-    sns.lineplot(delay, times, color = 'blue')
-    plt.show()
+    print("Mean value of node %i is %f"%(k,np.mean(delay)))
+    print("STD value of node %i is %f"%(k,np.std(delay)))
+    # print(np.mean(delay),np.std(delay))
+    # sns.lineplot(delay, times, color = 'blue')
+    # plt.show()
 
 #try:
     #start=timeit.default_timer()
